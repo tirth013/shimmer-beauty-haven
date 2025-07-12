@@ -7,8 +7,11 @@ interface User {
   name: string;
   email: string;
   avatar?: string;
+  phone?: string;
+  address?: string;
   verify_email: boolean;
   status: string;
+  role?: string;
 }
 
 interface AuthContextType {

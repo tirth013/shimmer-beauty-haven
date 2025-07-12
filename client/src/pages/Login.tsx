@@ -111,8 +111,11 @@ const Login = () => {
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
-        <div className="mb-4 text-right">
-          <a href="/forgot-password" className="text-primary hover:underline text-sm font-medium">Forgot password?</a>
+        <div className="mb-4 flex justify-between items-center text-sm">
+          <a href="/forgot-password" className="text-primary hover:underline font-medium">Forgot password?</a>
+        </div>
+        <div className="mb-6 text-center text-sm text-muted-foreground">
+          No account? <a href="/register" className="text-primary hover:underline font-medium">Register.</a>
         </div>
         <Button
           type="submit"

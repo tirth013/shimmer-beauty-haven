@@ -249,7 +249,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
       message: "Missing or invalid request body.",
     });
   }
-  const { name, email, mobile, password } = req.body;
+  const { name, email, mobile, phone, address, password } = req.body;
 
   let updateFields = {};
   if (name) updateFields.name = name;
@@ -262,6 +262,8 @@ const updateUserDetails = asyncHandler(async (req, res) => {
     updateFields.email = email;
   }
   if (mobile) updateFields.mobile = mobile;
+  if (phone !== undefined) updateFields.phone = phone;
+  if (address !== undefined) updateFields.address = address;
   if (password) {
     const salt = await bcrypt.genSalt(10);
     updateFields.password = await bcrypt.hash(password, salt);
@@ -474,6 +476,33 @@ const getUserDetails = asyncHandler(async (req, res) => {
   return res.json({ success: true, data: user });
 });
 
+/**
+Returns user profile statistics.
+@route GET /api/user/profile/stats
+*/
+const getUserProfileStats = asyncHandler(async (req, res) => {
+  const userId = req.user?._id || req.userId;
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized: User ID missing." });
+  }
+  
+  const user = await UserModel.findById(userId).populate('orderHistory').populate('shopping_cart');
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found." });
+  }
+
+  const stats = {
+    totalOrders: user.orderHistory?.length || 0,
+    cartItems: user.shopping_cart?.length || 0,
+    memberSince: user.createdAt,
+    lastLogin: user.last_login_date,
+    emailVerified: user.verify_email,
+    accountStatus: user.status
+  };
+
+  return res.json({ success: true, data: stats });
+});
+
 module.exports = {
   registerUser,
   verifyEmail,
@@ -486,4 +515,5 @@ module.exports = {
   resetPassword,
   refreshToken,
   getUserDetails,
+  getUserProfileStats,
 };

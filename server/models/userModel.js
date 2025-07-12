@@ -26,6 +26,14 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    phone: {
+      type: String,
+      default: "",
+    },
+    address: {
+      type: String,
+      default: "",
+    },
     refresh_token: {
       type: String,
       default: "",

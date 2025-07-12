@@ -41,6 +41,23 @@ const SummaryApi = {
     url: "/api/user/update-user",
     method: "put",
   },
+  // Profile-specific endpoints
+  profile: {
+    url: "/api/user/profile",
+    method: "get",
+  },
+  profileUpdate: {
+    url: "/api/user/profile/update",
+    method: "put",
+  },
+  profileAvatar: {
+    url: "/api/user/profile/avatar",
+    method: "put",
+  },
+  profileStats: {
+    url: "/api/user/profile/stats",
+    method: "get",
+  },
 };
 
 export default SummaryApi;

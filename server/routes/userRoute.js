@@ -11,21 +11,34 @@ const {
   resetPassword,
   refreshToken,
   getUserDetails,
+  getUserProfileStats,
 } = require("../controller/userController");
 const auth = require("../middleware/auth");
 const upload = require("../middleware/multer");
+const adminOnly = require("../middleware/adminOnly");
 const router = express.Router();
 
+// Public routes
 router.route("/register").post(registerUser);
 router.route("/verify-email").post(verifyEmail);
 router.route("/login").post(login);
-router.route("/logout").post(auth, logout);
-router.route("/upload-avatar").put(auth, upload.single("avatar"), uploadAvatar);
-router.route("/update-user").put(auth, updateUserDetails);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/verify-forgot-password-otp").post(verifyForgotPasswordOtp);
 router.route("/reset-password").post(resetPassword);
 router.route("/refresh-token").post(refreshToken);
+
+// Protected routes (require authentication)
+router.route("/logout").post(auth, logout);
 router.route("/details").get(auth, getUserDetails);
+router.route("/upload-avatar").put(auth, upload.single("avatar"), uploadAvatar);
+router.route("/update-user").put(auth, updateUserDetails);
+
+// Profile-specific routes (for all authenticated users)
+router.route("/profile").get(auth, getUserDetails);
+router.route("/profile/update").put(auth, updateUserDetails);
+router
+  .route("/profile/avatar")
+  .put(auth, upload.single("avatar"), uploadAvatar);
+router.route("/profile/stats").get(auth, getUserProfileStats);
 
 module.exports = router;

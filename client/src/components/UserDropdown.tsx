@@ -12,6 +12,7 @@ import {
 import { User, LogIn, UserPlus, LogOut, Settings, UserIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import isAdmin from '@/utils/isAdmin';
 
 const UserDropdown = () => {
   const { isAuthenticated, user, logout, loading } = useAuth();
@@ -57,6 +58,28 @@ const UserDropdown = () => {
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
+            {isAdmin(user?.role) && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link to="/category" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Add Category</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/upload-product" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Upload Product</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/product-admin" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>View Products</span>
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
