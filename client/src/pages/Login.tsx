@@ -30,7 +30,7 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      await Axios({
+      const response = await Axios({
         method: SummaryApi.login.method,
         url: SummaryApi.login.url,
         data: {
@@ -38,8 +38,22 @@ const Login = () => {
           password: form.password,
         },
       });
+      
+      // Store tokens
+      if (response.data.data.accessToken) {
+        localStorage.setItem('accesstoken', response.data.data.accessToken);
+      }
+      if (response.data.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.data.refreshToken);
+      }
       localStorage.setItem('isLoggedIn', 'true');
+      
+      // Dispatch events for auth context
       window.dispatchEvent(new Event('loginStateChange'));
+      
+      // Update auth context
+      await checkAuthStatus();
+      
       navigate('/');
     } catch (err: any) {
       setError(
