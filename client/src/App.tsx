@@ -10,6 +10,11 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import OtpVerification from "./pages/OtpVerification";
 import ResetPassword from "./pages/ResetPassword";
+import Shop from "./pages/Shop";
+import Skincare from "./pages/Skincare";
+import Makeup from "./pages/Makeup";
+import Fragrance from "./pages/Fragrance";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
