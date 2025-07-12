@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Palette, Eye, Lips, Sparkles, Star, Heart, Play } from "lucide-react";
+import { Palette, Eye, Circle, Sparkles, Star, Heart, Play } from "lucide-react";
 
 const Makeup = () => {
   const categories = [
@@ -15,7 +15,7 @@ const Makeup = () => {
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: <Lips className="h-8 w-8" />,
+      icon: <Circle className="h-8 w-8" />,
       title: "Lips",
       description: "Lipsticks, glosses, and stains",
       products: 38,
