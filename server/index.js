@@ -18,7 +18,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL,
+    origin: "http://localhost:5173", // Updated to match Vite dev server port
   })
 );
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
