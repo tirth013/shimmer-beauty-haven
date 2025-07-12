@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Axios from '@/utils/Axios';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
