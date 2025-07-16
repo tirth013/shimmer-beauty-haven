@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
-import SummaryApi, { baseURL } from '../common/SummaryApi';
+import SummaryApi, { baseURL } from '../common/summaryApi';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
