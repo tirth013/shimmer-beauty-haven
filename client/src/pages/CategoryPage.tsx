@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Upload, Image as ImageIcon, Search, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
+import UploadCategory from './UploadCategory';
 
 interface Category {
   _id: string;
@@ -36,18 +35,9 @@ const CategoryPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDialog, setShowDialog] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
   const [filterParent, setFilterParent] = useState<string>('all');
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    parentCategory: '',
-  });
 
   useEffect(() => {
     fetchCategories();
@@ -75,93 +65,28 @@ const CategoryPage = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleAddCategory = () => {
+    setEditingCategory(null);
+    setShowUploadDialog(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || (!editingCategory && !imageFile)) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      if (formData.parentCategory) {
-        formDataToSend.append('parentCategory', formData.parentCategory);
-      }
-      if (imageFile) {
-        formDataToSend.append('image', imageFile);
-      }
-
-      let response;
-      if (editingCategory) {
-        response = await Axios({
-          method: SummaryApi.updateCategory.method,
-          url: `${SummaryApi.updateCategory.url}/${editingCategory._id}`,
-          data: formDataToSend,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      } else {
-        response = await Axios({
-          method: SummaryApi.createCategory.method,
-          url: SummaryApi.createCategory.url,
-          data: formDataToSend,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      }
-
-      if (response.data.success) {
-        toast({
-          title: "Success",
-          description: editingCategory ? "Category updated successfully" : "Category created successfully",
-        });
-        setShowDialog(false);
-        resetForm();
-        fetchCategories();
-      }
-    } catch (error: any) {
-      console.error('Error saving category:', error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to save category",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEdit = (category: Category) => {
+  const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
-    setFormData({
-      name: category.name,
-      parentCategory: category.parentCategory?._id || '',
-    });
-    setImagePreview(category.image.url);
-    setShowDialog(true);
+    setShowUploadDialog(true);
   };
 
-  const handleDelete = async (categoryId: string) => {
+  const handleUploadSuccess = () => {
+    fetchCategories();
+    setShowUploadDialog(false);
+    setEditingCategory(null);
+  };
+
+  const handleUploadClose = () => {
+    setShowUploadDialog(false);
+    setEditingCategory(null);
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
     try {
       const response = await Axios({
         method: SummaryApi.deleteCategory.method,
@@ -184,13 +109,6 @@ const CategoryPage = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({ name: '', parentCategory: '' });
-    setImageFile(null);
-    setImagePreview('');
-    setEditingCategory(null);
-  };
-
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterParent === 'all' || 
@@ -208,84 +126,10 @@ const CategoryPage = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Category Management</h1>
           <p className="text-muted-foreground">Manage product categories and subcategories</p>
         </div>
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogTrigger asChild>
-            <Button onClick={() => resetForm()} className="bg-gradient-luxury">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
-              <DialogDescription>
-                {editingCategory ? 'Update the category details below' : 'Add a new category to your store'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Category Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Enter category name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="parentCategory">Parent Category (Optional)</Label>
-                <Select value={formData.parentCategory} onValueChange={(value) => setFormData({...formData, parentCategory: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select parent category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None (Main Category)</SelectItem>
-                    {parentCategories.map((category) => (
-                      <SelectItem key={category._id} value={category._id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">Category Image {!editingCategory && '*'}</Label>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <Input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="cursor-pointer"
-                    />
-                  </div>
-                  {imagePreview && (
-                    <div className="w-16 h-16 rounded-lg overflow-hidden border">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={submitting} className="bg-gradient-luxury">
-                  {submitting ? 'Saving...' : editingCategory ? 'Update' : 'Create'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleAddCategory} className="bg-gradient-luxury">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Category
+        </Button>
       </div>
 
       <Card>
@@ -369,7 +213,7 @@ const CategoryPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(category)}
+                          onClick={() => handleEditCategory(category)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -389,7 +233,7 @@ const CategoryPage = () => {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                onClick={() => handleDelete(category._id)}
+                                onClick={() => handleDeleteCategory(category._id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete
@@ -406,6 +250,15 @@ const CategoryPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Upload Category Dialog */}
+      <UploadCategory
+        open={showUploadDialog}
+        onClose={handleUploadClose}
+        onSuccess={handleUploadSuccess}
+        editingCategory={editingCategory}
+        parentCategories={parentCategories}
+      />
     </div>
   );
 };
