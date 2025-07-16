@@ -7,12 +7,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, user, loading } = useAuth();
 
     if (loading) return null;
-    
-    // Temporarily bypass for testing - remove in production
-    if (process.env.NODE_ENV === 'development') {
-        return <>{children}</>;
-    }
-    
     if (!isAuthenticated || !isAdmin(user?.role)) {
         return <Navigate to="/" replace />;
     }
