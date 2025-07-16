@@ -58,6 +58,68 @@ const SummaryApi = {
     url: "/api/user/profile/stats",
     method: "get",
   },
+  // Category endpoints
+  getAllCategories: {
+    url: "/api/category/all",
+    method: "get",
+  },
+  getCategoryHierarchy: {
+    url: "/api/category/hierarchy",
+    method: "get",
+  },
+  searchCategories: {
+    url: "/api/category/search",
+    method: "get",
+  },
+  getCategoryById: {
+    url: "/api/category",
+    method: "get",
+  },
+  createCategory: {
+    url: "/api/category/create",
+    method: "post",
+  },
+  updateCategory: {
+    url: "/api/category",
+    method: "put",
+  },
+  deleteCategory: {
+    url: "/api/category",
+    method: "delete",
+  },
+  // Product endpoints
+  getAllProducts: {
+    url: "/api/product/all",
+    method: "get",
+  },
+  getProductById: {
+    url: "/api/product",
+    method: "get",
+  },
+  searchProducts: {
+    url: "/api/product/search",
+    method: "get",
+  },
+  getFeaturedProducts: {
+    url: "/api/product/featured",
+    method: "get",
+  },
+  getProductsByCategory: {
+    url: "/api/product/category",
+    method: "get",
+  },
+  createProduct: {
+    url: "/api/product/create",
+    method: "post",
+  },
+  updateProduct: {
+    url: "/api/product",
+    method: "put",
+  },
+  deleteProduct: {
+    url: "/api/product",
+    method: "delete",
+  },
 };
 
 export default SummaryApi;
