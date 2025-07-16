@@ -8,7 +8,8 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const connectDb = require("./config/dbConnection");
 const userRouter = require("./routes/userRoute");
-
+const productRouter = require("./routes/productRoute");
+const categoryRouter = require("./routes/categoryRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,8 @@ app.get("/", (req, res) => {
   res.send("API is running!");
 });
 app.use("/api/user", userRouter);
+app.use("/api/product", productRouter);
+app.use("/api/category", categoryRouter);
 
 // Connect to DB and start server
 const startServer = async () => {

@@ -1,3 +1,4 @@
+// userController.js file
 const UserModel = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");

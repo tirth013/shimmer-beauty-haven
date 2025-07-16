@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, Search, Menu, X, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserDropdown from "@/components/UserDropdown";
+import SearchDropdown from './ui/SearchDropdown';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const navItems = [
     { name: "Shop", href: "/shop" },
@@ -40,9 +42,12 @@ const Navigation = () => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Search className="h-5 w-5" />
-            </Button>
+            <div className="relative">
+              <Button variant="ghost" size="icon" className="hidden md:flex" onClick={() => setSearchOpen(true)}>
+                <Search className="h-5 w-5" />
+              </Button>
+              <SearchDropdown open={searchOpen} onClose={() => setSearchOpen(false)} />
+            </div>
             <UserDropdown />
             <Button variant="ghost" size="icon">
               <Heart className="h-5 w-5" />
