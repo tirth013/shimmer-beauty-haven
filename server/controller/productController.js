@@ -134,8 +134,9 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 });
 
+
 /**
- * Get all products with filtering and pagination
+ * Get all products with advanced filtering, sorting, and pagination
  * @route GET /api/product/all
  */
 const getAllProducts = asyncHandler(async (req, res) => {
@@ -144,10 +145,11 @@ const getAllProducts = asyncHandler(async (req, res) => {
     brand,
     minPrice,
     maxPrice,
-    sortBy,
-    sortOrder,
+    minRating, // New filter for minimum rating
+    sortBy = 'createdAt', // Default sort field
+    sortOrder = 'desc', // Default sort order
     page = 1,
-    limit = 12,
+    limit = 10,
     search,
     isActive,
   } = req.query;
@@ -166,6 +168,11 @@ const getAllProducts = asyncHandler(async (req, res) => {
     if (maxPrice) filter.price.$lte = Number(maxPrice);
   }
 
+  // Minimum rating filter
+  if (minRating) {
+    filter['ratings.average'] = { $gte: Number(minRating) };
+  }
+
   // Search filter
   if (search) {
     filter.$or = [
@@ -178,10 +185,16 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
   // Build sort object
   let sort = {};
-  if (sortBy) {
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+  if (sortBy === 'featured') {
+    // For 'featured', sort by isFeatured first, then by creation date
+    sort.isFeatured = -1;
+    sort.createdAt = -1;
+  } else if (sortBy === 'rating') {
+    // Sort by average rating
+    sort['ratings.average'] = sortOrder === 'asc' ? 1 : -1;
   } else {
-    sort.createdAt = -1; // Default sort by newest
+    // Default sorting for fields like 'price' or 'createdAt'
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
   }
 
   // Pagination
@@ -211,6 +224,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
     },
   });
 });
+
 
 /**
  * Get single product by ID or slug
