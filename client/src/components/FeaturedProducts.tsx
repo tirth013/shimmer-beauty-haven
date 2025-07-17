@@ -6,9 +6,11 @@ import SummaryApi from '../common/summaryApi';
 import { Skeleton } from "./ui/skeleton";
 import { Link } from "react-router-dom";
 
+// Define the Product interface to match the data structure from the backend.
 interface Product {
   _id: string;
   name: string;
+  slug: string; // Added slug to the interface
   price: number;
   originalPrice?: number;
   images: Array<{ url: string }>;
@@ -82,6 +84,7 @@ const FeaturedProducts = () => {
               <ProductCard
                 key={product._id}
                 id={product._id}
+                slug={product.slug} // Passing the slug to the ProductCard
                 name={product.name}
                 price={product.price}
                 originalPrice={product.originalPrice}

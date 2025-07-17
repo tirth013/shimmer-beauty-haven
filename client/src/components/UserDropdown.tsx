@@ -9,9 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogIn, UserPlus, LogOut, Settings, UserIcon } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, Settings, UserIcon, LayoutGrid, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
 import isAdmin from '@/utils/isAdmin';
 
 const UserDropdown = () => {
@@ -53,29 +52,27 @@ const UserDropdown = () => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/profile" className="flex items-center">
+              <Link to="/profile" className="flex items-center cursor-pointer">
                 <UserIcon className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
             {isAdmin(user?.role) && (
               <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
+                {/* Corrected the link to point to the admin categories page */}
                 <DropdownMenuItem asChild>
-                  <Link to="/category" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>View Categories</span>
+                  <Link to="/admin/category-admin" className="flex items-center cursor-pointer">
+                    <LayoutGrid className="mr-2 h-4 w-4" />
+                    <span>Manage Categories</span>
                   </Link>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem asChild>
-                  <Link to="/upload-product" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Upload Product</span>
-                  </Link>
-                </DropdownMenuItem> */}
+                {/* Corrected the link to point to the admin products page */}
                 <DropdownMenuItem asChild>
-                  <Link to="/product-admin" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>View Products</span>
+                  <Link to="/admin/product-admin" className="flex items-center cursor-pointer">
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>Manage Products</span>
                   </Link>
                 </DropdownMenuItem>
               </>
@@ -95,13 +92,13 @@ const UserDropdown = () => {
             <DropdownMenuLabel className="font-playfair">Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/login" className="flex items-center">
+              <Link to="/login" className="flex items-center cursor-pointer">
                 <LogIn className="mr-2 h-4 w-4" />
                 <span>Login</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/register" className="flex items-center">
+              <Link to="/register" className="flex items-center cursor-pointer">
                 <UserPlus className="mr-2 h-4 w-4" />
                 <span>Register</span>
               </Link>

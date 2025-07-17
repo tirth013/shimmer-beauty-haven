@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Filter, Grid, List, Star, Loader2, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
@@ -16,6 +15,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 // Interfaces for type safety
 interface Product {
   _id: string; name: string; price: number; originalPrice?: number;
+  slug: string; // Added slug
   images: Array<{ url: string }>;
   ratings: { average: number; numOfReviews: number; };
   category: { _id: string; name: string; };
@@ -34,24 +34,17 @@ const Shop = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
   
-  // State for filters and sorting
   const [activeCategory, setActiveCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [rating, setRating] = useState(0);
   const [sortBy, setSortBy] = useState('featured-desc');
 
-  // Debounce the price range to avoid excessive API calls while sliding
   const debouncedPriceRange = useDebounce(priceRange, 500);
 
-  // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  /**
-   * Fetches products based on the current filter and sort states.
-   * Can be used for both initial load and subsequent filtered fetches.
-   */
   const fetchProducts = useCallback(async (page: number, newFilters = false) => {
     if (page === 1) setLoading(true); else setLoadingMore(true);
     setError(null);
@@ -89,7 +82,6 @@ const Shop = () => {
     }
   }, [activeCategory, debouncedPriceRange, rating, sortBy]);
 
-  // Fetch categories on initial mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -105,7 +97,6 @@ const Shop = () => {
     fetchCategories();
   }, [totalProducts]);
 
-  // Re-fetch products when filters change
   useEffect(() => {
     fetchProducts(1, true);
   }, [fetchProducts]);
@@ -157,7 +148,6 @@ const Shop = () => {
                   </Button>
                 </div>
                 
-                {/* Categories Filter */}
                 <div className="mb-8">
                   <h4 className="font-medium mb-4">Categories</h4>
                   <div className="space-y-1 max-h-60 overflow-y-auto pr-2">
@@ -181,7 +171,6 @@ const Shop = () => {
                   </div>
                 </div>
 
-                {/* Price Range Filter */}
                 <div className="mb-8">
                   <h4 className="font-medium mb-4">Price Range</h4>
                   <Slider
@@ -197,7 +186,6 @@ const Shop = () => {
                   </div>
                 </div>
 
-                {/* Rating Filter */}
                 <div>
                   <h4 className="font-medium mb-4">Rating</h4>
                   <div className="flex items-center space-x-2">
@@ -267,7 +255,7 @@ const Shop = () => {
                     const thirtyDaysAgo = new Date();
                     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                     const isNew = new Date(product.createdAt) > thirtyDaysAgo;
-                    return <ProductCard key={product._id} id={product._id} name={product.name} price={product.price} originalPrice={product.originalPrice} image={product.images[0]?.url || ''} rating={product.ratings.average} reviews={product.ratings.numOfReviews} category={product.category.name} isSale={!!(product.originalPrice && product.originalPrice > product.price)} isNew={isNew} />;
+                    return <ProductCard key={product._id} id={product._id} slug={product.slug} name={product.name} price={product.price} originalPrice={product.originalPrice} image={product.images[0]?.url || ''} rating={product.ratings.average} reviews={product.ratings.numOfReviews} category={product.category.name} isSale={!!(product.originalPrice && product.originalPrice > product.price)} isNew={isNew} />;
                   })}
                 </div>
               )}

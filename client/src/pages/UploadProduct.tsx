@@ -288,7 +288,7 @@ const UploadProduct = () => {
           title: "Success",
           description: isEditing ? "Product updated successfully" : "Product created successfully",
         });
-        navigate('/product-admin');
+        navigate('/admin/product-admin');
       }
     } catch (error: any) {
       console.error('Error saving product:', error);
@@ -305,7 +305,7 @@ const UploadProduct = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="flex items-center gap-4 mb-6">
-        <Link to="/product-admin">
+        <Link to="/admin/product-admin">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
@@ -622,11 +622,11 @@ const UploadProduct = () => {
 
         {/* Submit Button */}
         <div className="flex justify-end gap-4">
-          <Link to="/product-admin">
+          <Link to="/admin/product-admin">
             <Button type="button" variant="outline">
               Cancel
             </Button>
-          </Link>
+          </Link >
           <Button type="submit" disabled={loading} className="bg-gradient-luxury">
             {loading ? 'Saving...' : (
               <>

@@ -13,6 +13,7 @@ import { ArrowLeft } from 'lucide-react';
 interface Product {
   _id: string;
   name: string;
+  slug: string; // Added slug
   price: number;
   originalPrice?: number;
   images: Array<{ url: string }>;
@@ -29,16 +30,12 @@ interface Product {
 }
 
 const CategoryProductsPage = () => {
-  // Get the category identifier (ID or slug) from the URL
   const { categoryId } = useParams<{ categoryId: string }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryName, setCategoryName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Fetches products for the specific category when the component mounts or the categoryId changes.
-   */
   useEffect(() => {
     if (!categoryId) return;
 
@@ -111,6 +108,7 @@ const CategoryProductsPage = () => {
                     <ProductCard
                       key={product._id}
                       id={product._id}
+                      slug={product.slug} // Passing the slug
                       name={product.name}
                       price={product.price}
                       originalPrice={product.originalPrice}

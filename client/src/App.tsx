@@ -22,6 +22,7 @@ import CategoryAdmin from "./pages/CategoryAdmin";
 import UploadProduct from "./pages/UploadProduct";
 import ProductAdmin from "./pages/ProductAdmin";
 import CategoryProductsPage from "./pages/CategoryProductsPage"; // Import the new page
+import ProductDetailPage from "./pages/ProductDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -48,11 +49,12 @@ const App = () => (
             
             {/* New route for displaying products of a specific category */}
             <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+            <Route path="/product/:slug" element={<ProductDetailPage />} />
 
             {/* Admin Routes */}
-            <Route path="/admin/categories" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
-            <Route path="/admin/products/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
-            <Route path="/admin/products" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
+            <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
+            <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
+            <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
