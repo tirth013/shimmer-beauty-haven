@@ -66,8 +66,10 @@ const createCategory = asyncHandler(async (req, res) => {
   }
 
   // Create category
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
   const categoryData = {
     name,
+    slug,
     image: {
       public_id: upload.public_id,
       url: upload.url,

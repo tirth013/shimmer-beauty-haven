@@ -63,15 +63,15 @@ const UserDropdown = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/category" className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Add Category</span>
+                    <span>View Categories</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <Link to="/upload-product" className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Upload Product</span>
                   </Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem asChild>
                   <Link to="/product-admin" className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />

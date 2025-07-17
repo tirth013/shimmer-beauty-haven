@@ -54,7 +54,7 @@ const UploadCategory: React.FC<UploadCategoryProps> = ({
     if (editingCategory) {
       setFormData({
         name: editingCategory.name,
-        parentCategory: editingCategory.parentCategory?._id || '',
+        parentCategory: editingCategory.parentCategory?._id || 'none',
       });
       setImagePreview(editingCategory.image.url);
     } else {
@@ -70,7 +70,7 @@ const UploadCategory: React.FC<UploadCategoryProps> = ({
   }, [open]);
 
   const resetForm = () => {
-    setFormData({ name: '', parentCategory: '' });
+    setFormData({ name: '', parentCategory: 'none' });
     setImageFile(null);
     setImagePreview('');
   };
@@ -134,7 +134,7 @@ const UploadCategory: React.FC<UploadCategoryProps> = ({
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name.trim());
       
-      if (formData.parentCategory) {
+      if (formData.parentCategory && formData.parentCategory !== 'none') {
         formDataToSend.append('parentCategory', formData.parentCategory);
       }
       
@@ -233,14 +233,14 @@ const UploadCategory: React.FC<UploadCategoryProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="parentCategory">Parent Category (Optional)</Label>
                 <Select 
-                  value={formData.parentCategory} 
-                  onValueChange={(value) => setFormData({...formData, parentCategory: value})}
+                  value={formData.parentCategory || 'none'} 
+                  onValueChange={(value) => setFormData({...formData, parentCategory: value === 'none' ? '' : value})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (Main Category)</SelectItem>
+                    <SelectItem value="none">None (Main Category)</SelectItem>
                     {parentCategories.map((category) => (
                       <SelectItem key={category._id} value={category._id}>
                         {category.name}

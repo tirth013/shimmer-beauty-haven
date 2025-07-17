@@ -7,10 +7,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, ArrowLeft } from 'lucide-react';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import UploadCategory from './UploadCategory';
+import { useNavigate } from 'react-router-dom';
 
 interface Category {
   _id: string;
@@ -38,6 +39,7 @@ const CategoryPage = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [filterParent, setFilterParent] = useState<string>('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -121,6 +123,15 @@ const CategoryPage = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
+      {/* Back Button */}
+      <Button
+        variant="outline"
+        className="mb-4 flex items-center gap-2"
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Button>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Category Management</h1>
@@ -175,7 +186,6 @@ const CategoryPage = () => {
                   <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Parent</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -199,11 +209,6 @@ const CategoryPage = () => {
                       ) : (
                         <Badge variant="secondary">Main Category</Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={category.isActive ? "default" : "destructive"}>
-                        {category.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       {new Date(category.createdAt).toLocaleDateString()}

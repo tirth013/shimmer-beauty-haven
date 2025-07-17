@@ -103,6 +103,7 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   // Create product
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
   const productData = {
     name,
     description,
@@ -115,6 +116,7 @@ const createProduct = asyncHandler(async (req, res) => {
     images: uploadedImages,
     specifications: parsedSpecifications || {},
     tags: parsedTags || [],
+    slug,
   };
 
   const newProduct = new ProductModel(productData);

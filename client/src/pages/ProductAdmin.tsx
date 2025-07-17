@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { toast } from "@/hooks/use-toast";
-import { Search, Filter, Edit, Trash2, Plus, Package, Star, DollarSign, ShoppingCart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Filter, Edit, Trash2, Plus, Package, Star, DollarSign, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 
@@ -64,6 +64,7 @@ const ProductAdmin = () => {
     hasPrev: false,
   });
   const [categories, setCategories] = useState<Array<{_id: string, name: string}>>([]);
+  const navigate = useNavigate();
 
   const itemsPerPage = 10;
 
@@ -181,6 +182,16 @@ const ProductAdmin = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Back Button */}
+      <Button
+        variant="outline"
+        className="mb-4 flex items-center gap-2"
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Button>
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Product Management</h1>
