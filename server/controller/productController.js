@@ -430,14 +430,24 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 /**
- * Get products by category
+ * Get products by category ID or slug
  * @route GET /api/product/category/:categoryId
+ * @description This function now correctly handles both MongoDB ObjectIDs and URL-friendly slugs.
  */
 const getProductsByCategory = asyncHandler(async (req, res) => {
-  const { categoryId } = req.params;
+  const { categoryId } = req.params; // This can be either an ID or a slug
   const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
-  const category = await CategoryModel.findById(categoryId);
+  let category;
+
+  // Check if the provided categoryId looks like a MongoDB ObjectId.
+  // If it does, search by ID. Otherwise, assume it's a slug.
+  if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+    category = await CategoryModel.findById(categoryId);
+  } else {
+    category = await CategoryModel.findOne({ slug: categoryId });
+  }
+
   if (!category) {
     return res.status(404).json({
       success: false,
@@ -449,8 +459,9 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
   const sort = {};
   sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
+  // Fetch products using the found category's actual _id
   const products = await ProductModel.find({ 
-    category: categoryId, 
+    category: category._id, 
     isActive: true 
   })
     .populate('category', 'name slug')
@@ -459,7 +470,7 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
     .limit(parseInt(limit));
 
   const totalProducts = await ProductModel.countDocuments({ 
-    category: categoryId, 
+    category: category._id, 
     isActive: true 
   });
   const totalPages = Math.ceil(totalProducts / limit);

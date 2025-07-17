@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-beauty.jpg";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -36,9 +37,11 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in mb-16">
-          <Button size="lg" variant="luxury" className="px-10 py-6 text-lg font-semibold shadow-luxury hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-            Shop Collection
-          </Button>
+          <Link to="/shop">
+            <Button size="lg" variant="luxury" className="px-10 py-6 text-lg font-semibold shadow-luxury hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+              Shop Collection
+            </Button>
+          </Link>
           <Button size="lg" variant="hero" className="px-10 py-6 text-lg font-semibold backdrop-blur-md hover:bg-white/30 transition-all duration-300">
             Discover More
           </Button>

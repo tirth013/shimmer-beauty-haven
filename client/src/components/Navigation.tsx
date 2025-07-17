@@ -11,7 +11,7 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
 
   const navItems = [
-    { name: "Shop", href: "/shop" },
+    {    },
     { name: "Skincare", href: "/skincare" },
     { name: "Makeup", href: "/makeup" },
     { name: "Fragrance", href: "/fragrance" },
