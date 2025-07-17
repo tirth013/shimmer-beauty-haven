@@ -23,6 +23,7 @@ import UploadProduct from "./pages/UploadProduct";
 import ProductAdmin from "./pages/ProductAdmin";
 import CategoryProductsPage from "./pages/CategoryProductsPage"; // Import the new page
 import ProductDetailPage from "./pages/ProductDetailPage";
+import Wishlist from "./pages/Wishlist";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,7 @@ const App = () => (
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
-            
+
             {/* New route for displaying products of a specific category */}
             <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
             <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
             <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
+            <Route path="/wishlist" element={<Wishlist />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

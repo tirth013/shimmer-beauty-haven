@@ -11,7 +11,6 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
 
   const navItems = [
-    {    },
     { name: "Skincare", href: "/skincare" },
     { name: "Makeup", href: "/makeup" },
     { name: "Fragrance", href: "/fragrance" },
@@ -49,9 +48,11 @@ const Navigation = () => {
               <SearchDropdown open={searchOpen} onClose={() => setSearchOpen(false)} />
             </div>
             <UserDropdown />
-            <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
-            </Button>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">

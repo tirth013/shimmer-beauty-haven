@@ -12,6 +12,7 @@ interface User {
   verify_email: boolean;
   status: string;
   role?: string;
+  wishlist?: string[];
 }
 
 interface AuthContextType {

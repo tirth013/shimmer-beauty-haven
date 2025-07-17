@@ -3,6 +3,16 @@ import heroImage from "@/assets/hero-beauty.jpg";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
+  const handleDiscoverMore = () => {
+    const featuredProductsSection = document.getElementById("featured-products");
+    if (featuredProductsSection) {
+      featuredProductsSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback for other pages, though Hero is on Index
+      window.location.href = '/shop';
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -30,7 +40,7 @@ const Hero = () => {
             Natural Glow
           </span>
         </h1>
-        
+
         <p className="text-xl md:text-2xl mb-10 text-white/95 max-w-3xl mx-auto animate-fade-in leading-relaxed">
           Premium skincare and cosmetics crafted with the finest natural ingredients 
           to enhance your unique beauty and radiance.
@@ -42,7 +52,12 @@ const Hero = () => {
               Shop Collection
             </Button>
           </Link>
-          <Button size="lg" variant="hero" className="px-10 py-6 text-lg font-semibold backdrop-blur-md hover:bg-white/30 transition-all duration-300">
+          <Button 
+            size="lg" 
+            variant="hero" 
+            className="px-10 py-6 text-lg font-semibold backdrop-blur-md hover:bg-white/30 transition-all duration-300"
+            onClick={handleDiscoverMore}
+          >
             Discover More
           </Button>
         </div>

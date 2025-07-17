@@ -13,6 +13,8 @@ const {
   refreshToken,
   getUserDetails,
   getUserProfileStats,
+  toggleWishlist,
+  getWishlist,
 } = require("../controller/userController");
 const auth = require("../middleware/auth");
 const upload = require("../middleware/multer");
@@ -41,5 +43,8 @@ router
   .route("/profile/avatar")
   .put(auth, upload.single("avatar"), uploadAvatar);
 router.route("/profile/stats").get(auth, getUserProfileStats);
+
+// Wishlist routes
+router.route("/wishlist").post(auth, toggleWishlist).get(auth, getWishlist);
 
 module.exports = router;

@@ -1,4 +1,5 @@
-export const baseURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+export const baseURL =
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const SummaryApi = {
   register: {
@@ -119,6 +120,14 @@ const SummaryApi = {
   deleteProduct: {
     url: "/api/product",
     method: "delete",
+  },
+  toggleWishlist: {
+    url: "/api/user/wishlist",
+    method: "post",
+  },
+  getWishlist: {
+    url: "/api/user/wishlist",
+    method: "get",
   },
 };
 

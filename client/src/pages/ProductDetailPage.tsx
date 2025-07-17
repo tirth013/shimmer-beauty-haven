@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Star, Heart, ShoppingBag, Minus, Plus, ChevronRight } from 'lucide-react';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 // Define the Product interface for type safety
 interface Product {
@@ -33,6 +35,33 @@ const ProductDetailPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string>('');
     const [quantity, setQuantity] = useState(1);
+    const { isAuthenticated, user, updateUser } = useAuth();
+    const navigate = useNavigate();
+
+    const isLiked = user?.wishlist?.includes(product?._id);
+
+    const handleLikeClick = async () => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await Axios.post(SummaryApi.toggleWishlist.url, { productId: product._id });
+            if (response.data.success) {
+                updateUser({ ...user, wishlist: response.data.wishlist });
+                toast({
+                    title: response.data.message,
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Something went wrong.",
+                variant: "destructive",
+            });
+        }
+    };
 
     useEffect(() => {
         if (!slug) return;
@@ -171,8 +200,8 @@ const ProductDetailPage = () => {
                             <Button size="lg" className="flex-1 bg-gradient-luxury">
                                 <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart
                             </Button>
-                            <Button variant="outline" size="icon">
-                                <Heart className="h-5 w-5" />
+                            <Button variant="outline" size="icon" onClick={handleLikeClick}>
+                                <Heart className={`h-5 w-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
                             </Button>
                         </div>
 

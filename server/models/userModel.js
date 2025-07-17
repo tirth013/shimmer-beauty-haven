@@ -1,3 +1,5 @@
+// server/models/userModel.js
+
 const mongoose = require("mongoose");
 
 const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -82,6 +84,10 @@ const userSchema = new mongoose.Schema(
       enum: ["ADMIN", "USER"],
       default: "USER",
     },
+    wishlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product'
+    }]
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields for auditing

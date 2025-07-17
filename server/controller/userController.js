@@ -1,5 +1,6 @@
 // userController.js file
 const UserModel = require("../models/userModel");
+const ProductModel = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -258,7 +259,12 @@ const updateUserDetails = asyncHandler(async (req, res) => {
     // Check if email is already used by another user
     const existing = await UserModel.findOne({ email });
     if (existing && String(existing._id) !== String(userId)) {
-      return res.status(409).json({ success: false, message: "Email is already in use by another account." });
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "Email is already in use by another account.",
+        });
     }
     updateFields.email = email;
   }
@@ -277,7 +283,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
   }
   const updateUser = await UserModel.findByIdAndUpdate(userId, updateFields, {
     new: true,
-  }).select('-password');
+  }).select("-password");
   if (!updateUser) {
     return res.status(404).json({ success: false, message: "User not found." });
   }
@@ -438,7 +444,9 @@ const refreshToken = asyncHandler(async (req, res) => {
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Refresh token missing or invalid." });
+    return res
+      .status(401)
+      .json({ success: false, message: "Refresh token missing or invalid." });
   }
 
   try {
@@ -446,7 +454,9 @@ const refreshToken = asyncHandler(async (req, res) => {
     const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
     // Issue a new access token
-    const newAccessToken = await generateAccessToken(payload.userId || payload._id || payload.id);
+    const newAccessToken = await generateAccessToken(
+      payload.userId || payload._id || payload.id
+    );
 
     // Set the new access token in cookie
     res.cookie("accessToken", newAccessToken, cookiesOption);
@@ -454,10 +464,16 @@ const refreshToken = asyncHandler(async (req, res) => {
     return res.json({
       success: true,
       accessToken: newAccessToken,
-      message: "New access token issued."
+      message: "New access token issued.",
     });
   } catch (err) {
-    return res.status(401).json({ success: false, message: "Invalid or expired refresh token.", error: err.message });
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Invalid or expired refresh token.",
+        error: err.message,
+      });
   }
 });
 
@@ -468,9 +484,11 @@ Returns the current user's details.
 const getUserDetails = asyncHandler(async (req, res) => {
   const userId = req.user?._id || req.userId;
   if (!userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized: User ID missing." });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: User ID missing." });
   }
-  const user = await UserModel.findById(userId).select('-password');
+  const user = await UserModel.findById(userId).select("-password");
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found." });
   }
@@ -484,10 +502,14 @@ Returns user profile statistics.
 const getUserProfileStats = asyncHandler(async (req, res) => {
   const userId = req.user?._id || req.userId;
   if (!userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized: User ID missing." });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: User ID missing." });
   }
-  
-  const user = await UserModel.findById(userId).populate('orderHistory').populate('shopping_cart');
+
+  const user = await UserModel.findById(userId)
+    .populate("orderHistory")
+    .populate("shopping_cart");
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found." });
   }
@@ -498,10 +520,93 @@ const getUserProfileStats = asyncHandler(async (req, res) => {
     memberSince: user.createdAt,
     lastLogin: user.last_login_date,
     emailVerified: user.verify_email,
-    accountStatus: user.status
+    accountStatus: user.status,
   };
 
   return res.json({ success: true, data: stats });
+});
+
+/**
+Toggles a product in the user's wishlist.
+@route POST /api/user/wishlist
+*/
+const toggleWishlist = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const { productId } = req.body;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: User ID missing." });
+  }
+
+  if (!productId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Product ID is required." });
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found." });
+  }
+
+  const productExists = await ProductModel.findById(productId);
+  if (!productExists) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Product not found." });
+  }
+
+  const index = user.wishlist.indexOf(productId);
+  if (index > -1) {
+    // Product is in wishlist, remove it
+    user.wishlist.splice(index, 1);
+    await user.save();
+    return res.json({
+      success: true,
+      message: "Product removed from wishlist.",
+      wishlist: user.wishlist,
+    });
+  } else {
+    // Product is not in wishlist, add it
+    user.wishlist.push(productId);
+    await user.save();
+    return res.json({
+      success: true,
+      message: "Product added to wishlist.",
+      wishlist: user.wishlist,
+    });
+  }
+});
+
+/**
+Retrieves the user's wishlist.
+@route GET /api/user/wishlist
+*/
+const getWishlist = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: User ID missing." });
+  }
+
+  const user = await UserModel.findById(userId).populate({
+    path: "wishlist",
+    model: "Product",
+    populate: {
+      path: "category",
+      model: "Category",
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found." });
+  }
+
+  return res.json({ success: true, wishlist: user.wishlist });
 });
 
 module.exports = {
@@ -517,4 +622,6 @@ module.exports = {
   refreshToken,
   getUserDetails,
   getUserProfileStats,
+  toggleWishlist,
+  getWishlist,
 };
