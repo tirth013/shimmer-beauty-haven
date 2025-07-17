@@ -1,82 +1,105 @@
+import React, { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Filter, Grid, List, ShoppingBag, Star } from "lucide-react";
-import { useState } from "react";
+import ProductCard from "@/components/ProductCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import Axios from '@/utils/Axios';
+import SummaryApi from '@/common/summaryApi';
+
+// Define the Product interface to match the data structure from the backend API.
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  images: Array<{ url: string }>;
+  ratings: {
+    average: number;
+    numOfReviews: number;
+  };
+  category: {
+    _id: string;
+    name: string;
+  };
+  brand: string;
+  isSale?: boolean;
+  isNew?: boolean;
+  badge?: string;
+  createdAt: string;
+}
+
+// Define the Category interface for the filter sidebar.
+interface Category {
+  _id: string;
+  name: string;
+  productsCount: number;
+}
 
 const Shop = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('all');
 
-  const categories = [
-    { name: "All Products", count: 120, active: true },
-    { name: "Skincare", count: 45 },
-    { name: "Makeup", count: 38 },
-    { name: "Fragrance", count: 22 },
-    { name: "Hair Care", count: 15 },
-  ];
+  /**
+   * Fetches all necessary data for the shop page, including products and categories.
+   * It runs once when the component mounts.
+   */
+  useEffect(() => {
+    const fetchShopData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const products = [
-    {
-      id: 1,
-      name: "Radiant Glow Serum",
-      category: "Skincare",
-      price: 89.99,
-      originalPrice: 120.00,
-      rating: 4.8,
-      reviews: 128,
-      image: "/api/placeholder/300/300",
-      badge: "Best Seller"
-    },
-    {
-      id: 2,
-      name: "Luxury Matte Lipstick",
-      category: "Makeup",
-      price: 34.99,
-      rating: 4.9,
-      reviews: 89,
-      image: "/api/placeholder/300/300",
-      badge: "New"
-    },
-    {
-      id: 3,
-      name: "Midnight Rose Perfume",
-      category: "Fragrance",
-      price: 125.00,
-      rating: 4.7,
-      reviews: 156,
-      image: "/api/placeholder/300/300",
-      badge: "Limited Edition"
-    },
-    {
-      id: 4,
-      name: "Hydrating Face Cream",
-      category: "Skincare",
-      price: 67.50,
-      rating: 4.6,
-      reviews: 203,
-      image: "/api/placeholder/300/300"
-    },
-    {
-      id: 5,
-      name: "Illuminating Foundation",
-      category: "Makeup",
-      price: 45.99,
-      rating: 4.8,
-      reviews: 94,
-      image: "/api/placeholder/300/300"
-    },
-    {
-      id: 6,
-      name: "Botanical Hair Mask",
-      category: "Hair Care",
-      price: 28.99,
-      rating: 4.5,
-      reviews: 67,
-      image: "/api/placeholder/300/300"
-    }
-  ];
+        // Fetch products and categories concurrently for better performance.
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          Axios.get(SummaryApi.getAllProducts.url),
+          Axios.get(SummaryApi.getAllCategories.url)
+        ]);
+
+        // Process products response.
+        if (productsResponse.data.success) {
+          setProducts(productsResponse.data.data.products);
+          setTotalProducts(productsResponse.data.data.pagination.totalProducts);
+        } else {
+          throw new Error("Failed to fetch products");
+        }
+
+        // Process categories response.
+        if (categoriesResponse.data.success) {
+          const allProductsCategory = {
+            _id: 'all',
+            name: 'All Products',
+            // The backend doesn't provide a total count for categories, so we use the product total.
+            productsCount: productsResponse.data.data.pagination.totalProducts
+          };
+          setCategories([allProductsCategory, ...categoriesResponse.data.data]);
+        } else {
+          throw new Error("Failed to fetch categories");
+        }
+
+      } catch (err) {
+        setError("Could not load shop data. Please try again later.");
+        console.error("Error fetching shop data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchShopData();
+  }, []); // Empty dependency array ensures this runs only on mount.
+
+  // Filtered products based on the selected category.
+  const filteredProducts = activeCategory === 'all'
+    ? products
+    : products.filter(p => p.category._id === activeCategory);
 
   return (
     <div className="min-h-screen">
@@ -106,7 +129,7 @@ const Shop = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
             <div className="lg:w-1/4">
-              <div className="bg-white rounded-lg border p-6 sticky top-4">
+              <div className="bg-white rounded-lg border p-6 sticky top-24">
                 <div className="flex items-center gap-2 mb-6">
                   <Filter className="h-5 w-5" />
                   <h3 className="font-semibold">Filters</h3>
@@ -116,44 +139,26 @@ const Shop = () => {
                 <div className="mb-8">
                   <h4 className="font-medium mb-4">Categories</h4>
                   <div className="space-y-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category.name}
-                        className={`w-full text-left p-2 rounded-md transition-colors ${
-                          category.active 
-                            ? 'bg-rose-100 text-rose-800' 
-                            : 'hover:bg-gray-100'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <span>{category.name}</span>
-                          <span className="text-sm text-gray-500">({category.count})</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div className="mb-8">
-                  <h4 className="font-medium mb-4">Price Range</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <span>Under $25</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <span>$25 - $50</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <span>$50 - $100</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <span>Over $100</span>
-                    </label>
+                    {loading ? (
+                      Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)
+                    ) : (
+                      categories.map((category) => (
+                        <button
+                          key={category._id}
+                          onClick={() => setActiveCategory(category._id)}
+                          className={`w-full text-left p-2 rounded-md transition-colors ${
+                            activeCategory === category._id
+                              ? 'bg-rose-100 text-rose-800 font-semibold' 
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span>{category.name}</span>
+                            <span className="text-sm text-gray-500">({category.productsCount})</span>
+                          </div>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -164,8 +169,12 @@ const Shop = () => {
               {/* Toolbar */}
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h2 className="text-2xl font-semibold">All Products</h2>
-                  <p className="text-gray-600">Showing {products.length} of 120 products</p>
+                  <h2 className="text-2xl font-semibold">
+                    {activeCategory === 'all' ? 'All Products' : categories.find(c => c._id === activeCategory)?.name}
+                  </h2>
+                  <p className="text-gray-600">
+                    Showing {filteredProducts.length} of {totalProducts} products
+                  </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <select className="border rounded-md px-3 py-2">
@@ -192,67 +201,50 @@ const Shop = () => {
                 </div>
               </div>
 
-              {/* Product Grid */}
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
-                {products.map((product) => (
-                  <Card key={product.id} className="group hover:shadow-lg transition-shadow">
-                    <CardHeader className="p-0">
-                      <div className="relative overflow-hidden rounded-t-lg">
-                        <div className="w-full h-64 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-                          <ShoppingBag className="h-16 w-16 text-rose-300" />
-                        </div>
-                        {product.badge && (
-                          <Badge className="absolute top-3 left-3" variant="secondary">
-                            {product.badge}
-                          </Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <div className="text-sm text-gray-600">{product.category}</div>
-                        <CardTitle className="text-lg group-hover:text-rose-600 transition-colors">
-                          {product.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-1">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-4 w-4 ${
-                                  i < Math.floor(product.rating) 
-                                    ? 'text-yellow-400 fill-current' 
-                                    : 'text-gray-300'
-                                }`} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-600">
-                            {product.rating} ({product.reviews})
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold">${product.price}</span>
-                          {product.originalPrice && (
-                            <span className="text-gray-500 line-through">
-                              ${product.originalPrice}
-                            </span>
-                          )}
-                        </div>
-                        <Button className="w-full mt-4" variant="outline">
-                          Add to Cart
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {/* Product Grid/List */}
+              {loading ? (
+                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-64 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="text-center text-destructive py-10">{error}</div>
+              ) : (
+                <div className={`grid gap-6 ${
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                    : 'grid-cols-1'
+                }`}>
+                  {filteredProducts.map((product) => {
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    const isNew = new Date(product.createdAt) > thirtyDaysAgo;
 
-              {/* Load More */}
+                    return (
+                      <ProductCard
+                        key={product._id}
+                        id={product._id}
+                        name={product.name}
+                        price={product.price}
+                        originalPrice={product.originalPrice}
+                        image={product.images[0]?.url || '/api/placeholder/300/300'}
+                        rating={product.ratings.average}
+                        reviews={product.ratings.numOfReviews}
+                        category={product.category.name}
+                        isSale={!!(product.originalPrice && product.originalPrice > product.price)}
+                        isNew={isNew}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Load More Button (for future pagination) */}
               <div className="text-center mt-12">
                 <Button variant="outline" size="lg">
                   Load More Products
