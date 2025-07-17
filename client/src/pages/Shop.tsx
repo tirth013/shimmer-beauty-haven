@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Grid, List, ShoppingBag, Star } from "lucide-react";
+import { Filter, Grid, List, ShoppingBag, Star, Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import Axios from '@/utils/Axios';
@@ -47,10 +47,14 @@ const Shop = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const [activeCategory, setActiveCategory] = useState('all');
+  
+  // New state variables for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   /**
-   * Fetches all necessary data for the shop page, including products and categories.
-   * It runs once when the component mounts.
+   * Fetches the initial data for the shop page (first page of products and categories).
    */
   useEffect(() => {
     const fetchShopData = async () => {
@@ -60,7 +64,7 @@ const Shop = () => {
 
         // Fetch products and categories concurrently for better performance.
         const [productsResponse, categoriesResponse] = await Promise.all([
-          Axios.get(SummaryApi.getAllProducts.url),
+          Axios.get(`${SummaryApi.getAllProducts.url}?page=1`),
           Axios.get(SummaryApi.getAllCategories.url)
         ]);
 
@@ -68,6 +72,8 @@ const Shop = () => {
         if (productsResponse.data.success) {
           setProducts(productsResponse.data.data.products);
           setTotalProducts(productsResponse.data.data.pagination.totalProducts);
+          setHasMore(productsResponse.data.data.pagination.hasNext);
+          setCurrentPage(1);
         } else {
           throw new Error("Failed to fetch products");
         }
@@ -77,7 +83,6 @@ const Shop = () => {
           const allProductsCategory = {
             _id: 'all',
             name: 'All Products',
-            // The backend doesn't provide a total count for categories, so we use the product total.
             productsCount: productsResponse.data.data.pagination.totalProducts
           };
           setCategories([allProductsCategory, ...categoriesResponse.data.data]);
@@ -95,6 +100,33 @@ const Shop = () => {
 
     fetchShopData();
   }, []); // Empty dependency array ensures this runs only on mount.
+
+  /**
+   * Handles the "Load More" button click to fetch the next page of products.
+   */
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const response = await Axios.get(`${SummaryApi.getAllProducts.url}?page=${nextPage}`);
+
+      if (response.data.success) {
+        // Append new products to the existing list.
+        setProducts(prevProducts => [...prevProducts, ...response.data.data.products]);
+        setCurrentPage(nextPage);
+        setHasMore(response.data.data.pagination.hasNext);
+      } else {
+        throw new Error("Failed to fetch more products");
+      }
+    } catch (err) {
+      setError("Could not load more products.");
+      console.error("Error loading more products:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   // Filtered products based on the selected category.
   const filteredProducts = activeCategory === 'all'
@@ -244,12 +276,26 @@ const Shop = () => {
                 </div>
               )}
 
-              {/* Load More Button (for future pagination) */}
-              <div className="text-center mt-12">
-                <Button variant="outline" size="lg">
-                  Load More Products
-                </Button>
-              </div>
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="text-center mt-12">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Load More Products'
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

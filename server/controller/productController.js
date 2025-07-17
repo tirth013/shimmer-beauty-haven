@@ -147,7 +147,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
     sortBy,
     sortOrder,
     page = 1,
-    limit = 10,
+    limit = 12,
     search,
     isActive,
   } = req.query;
