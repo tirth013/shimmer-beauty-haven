@@ -18,9 +18,10 @@ import Fragrance from "./pages/Fragrance";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import AdminRoute from "./AdminRoute";
-import CategoryPage from "./pages/CategoryPage";
+import CategoryAdmin from "./pages/CategoryAdmin";
 import UploadProduct from "./pages/UploadProduct";
 import ProductAdmin from "./pages/ProductAdmin";
+import CategoryProductsPage from "./pages/CategoryProductsPage"; // Import the new page
 
 const queryClient = new QueryClient();
 
@@ -44,9 +45,15 @@ const App = () => (
             <Route path="/otp-verification" element={<OtpVerification />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/category" element={<AdminRoute><CategoryPage /></AdminRoute>} />
-            <Route path="/upload-product" element={<AdminRoute><UploadProduct /></AdminRoute>} />
-            <Route path="/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
+            
+            {/* New route for displaying products of a specific category */}
+            <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin/categories" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
+            <Route path="/admin/products/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
+            <Route path="/admin/products" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
