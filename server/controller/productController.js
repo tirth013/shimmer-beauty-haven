@@ -1,4 +1,4 @@
-// productController.js file
+// server/controller/productController.js
 const ProductModel = require("../models/productModel");
 const CategoryModel = require("../models/categoryModel");
 const asyncHandler = require("express-async-handler");
@@ -27,6 +27,7 @@ const createProduct = asyncHandler(async (req, res) => {
     sku,
     specifications,
     tags,
+    isFeatured, // Added isFeatured to destructuring
   } = req.body;
 
   const images = req.files; // Multiple images
@@ -117,6 +118,7 @@ const createProduct = asyncHandler(async (req, res) => {
     specifications: parsedSpecifications || {},
     tags: parsedTags || [],
     slug,
+    isFeatured: isFeatured === 'true', // Correctly handle the isFeatured flag
   };
 
   const newProduct = new ProductModel(productData);
@@ -262,6 +264,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     specifications,
     tags,
     isActive,
+    isFeatured, // Added isFeatured to destructuring
   } = req.body;
 
   const images = req.files; // New images if provided
@@ -290,7 +293,10 @@ const updateProduct = asyncHandler(async (req, res) => {
   if (price) updateFields.price = price;
   if (originalPrice !== undefined) updateFields.originalPrice = originalPrice;
   if (brand) updateFields.brand = brand;
-  if (isActive !== undefined) updateFields.isActive = isActive;
+  if (isActive !== undefined) updateFields.isActive = isActive === 'true';
+  if (isFeatured !== undefined) { // Correctly handle the isFeatured flag
+    updateFields.isFeatured = isFeatured === 'true';
+  }
 
   // Update category if provided
   if (category && category !== String(product.category)) {
