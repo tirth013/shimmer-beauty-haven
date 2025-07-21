@@ -158,6 +158,10 @@ const SummaryApi = {
     url: "/api/cart/merge",
     method: "post",
   },
+  googleLogin: {
+    url: `${baseURL}/api/auth/google`,
+    method: "get",
+  },
 };
 
 export default SummaryApi;

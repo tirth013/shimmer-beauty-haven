@@ -69,6 +69,11 @@ const ProductDetailPage = () => {
     };
 
     const handleAddToCart = () => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
         if (product) {
             addToCart({
                 id: product._id,

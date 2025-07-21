@@ -8,7 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import { toast } from '@/hooks/use-toast';
-import { formatRupees } from '@/lib/currency'; // Import the new currency formatter
+import { formatRupees } from '@/lib/currency';
 
 interface ProductCardProps {
     id: string;
@@ -72,6 +72,12 @@ const ProductCard = ({
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
         addToCart({
             id,
             name,
