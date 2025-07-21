@@ -11,6 +11,10 @@ const userRouter = require("./routes/userRoute");
 const productRouter = require("./routes/productRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const cartRouter = require("./routes/cartRoute");
+const session = require('express-session');
+const passport = require('passport');
+require('./config/passport-setup'); // Import passport config
+const authRouter = require("./routes/authRoute"); // Import auth routes
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,10 +36,21 @@ app.use(
   })
 );
 
+// --- Add Passport Middleware ---
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+// --- End Passport Middleware ---
+
 // Example route
 app.get("/", (req, res) => {
   res.send("API is running!");
 });
+app.use("/api/auth", authRouter); // Add auth routes
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/category", categoryRouter);
