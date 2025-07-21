@@ -10,7 +10,9 @@ import { Star, Heart, ShoppingBag, Minus, Plus, ChevronRight } from 'lucide-reac
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext'; // Import useCart
 import { toast } from '@/hooks/use-toast';
+import { formatRupees } from '@/lib/currency'; // Import the new currency formatter
 
 // Define the Product interface for type safety
 interface Product {
@@ -37,6 +39,7 @@ const ProductDetailPage = () => {
     const [quantity, setQuantity] = useState(1);
     const { isAuthenticated, user, updateUser } = useAuth();
     const navigate = useNavigate();
+    const { addToCart } = useCart(); // Use the cart context
 
     const isLiked = user?.wishlist?.includes(product?._id);
 
@@ -45,6 +48,8 @@ const ProductDetailPage = () => {
             navigate('/login');
             return;
         }
+
+        if (!product) return;
 
         try {
             const response = await Axios.post(SummaryApi.toggleWishlist.url, { productId: product._id });
@@ -59,6 +64,18 @@ const ProductDetailPage = () => {
                 title: "Error",
                 description: "Something went wrong.",
                 variant: "destructive",
+            });
+        }
+    };
+
+    const handleAddToCart = () => {
+        if (product) {
+            addToCart({
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0]?.url || '',
+                quantity: quantity,
             });
         }
     };
@@ -181,9 +198,9 @@ const ProductDetailPage = () => {
                         <p className="text-muted-foreground text-lg leading-relaxed">{product.description.split('.')[0]}.</p>
 
                         <div className="flex items-baseline gap-3">
-                            <span className="text-4xl font-bold text-primary">${product.price.toFixed(2)}</span>
+                            <span className="text-4xl font-bold text-primary">{formatRupees(product.price)}</span>
                             {product.originalPrice && (
-                                <span className="text-xl text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</span>
+                                <span className="text-xl text-muted-foreground line-through">{formatRupees(product.originalPrice)}</span>
                             )}
                         </div>
 
@@ -197,7 +214,7 @@ const ProductDetailPage = () => {
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
-                            <Button size="lg" className="flex-1 bg-gradient-luxury">
+                            <Button size="lg" className="flex-1 bg-gradient-luxury" onClick={handleAddToCart}>
                                 <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart
                             </Button>
                             <Button variant="outline" size="icon" onClick={handleLikeClick}>

@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext"; // Import CartProvider
+import CartSidePanel from "@/components/CartSidePanel"; // Import CartSidePanel
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -18,7 +20,7 @@ import AdminRoute from "./AdminRoute";
 import CategoryAdmin from "./pages/CategoryAdmin";
 import UploadProduct from "./pages/UploadProduct";
 import ProductAdmin from "./pages/ProductAdmin";
-import CategoryProductsPage from "./pages/CategoryProductsPage"; // Import the new page
+import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Wishlist from "./pages/Wishlist";
 
@@ -28,33 +30,31 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/otp-verification" element={<OtpVerification />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/profile" element={<Profile />} />
-
-            {/* New route for displaying products of a specific category */}
-            <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
-            <Route path="/product/:slug" element={<ProductDetailPage />} />
-
-            {/* Admin Routes */}
-            <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
-            <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
-            <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <CartProvider> {/* Wrap with CartProvider */}
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <CartSidePanel /> {/* Add CartSidePanel here */}
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/otp-verification" element={<OtpVerification />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+              <Route path="/product/:slug" element={<ProductDetailPage />} />
+              <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
+              <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
+              <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

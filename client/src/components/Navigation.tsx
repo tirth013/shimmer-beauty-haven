@@ -6,10 +6,12 @@ import { cn } from "@/lib/utils";
 import UserDropdown from "@/components/UserDropdown";
 import SearchDropdown from './ui/SearchDropdown';
 import { navItems } from "@/common/navConfig";
+import { useCart } from "@/contexts/CartContext"; // Import useCart
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { toggleCart, cartCount } = useCart(); // Use the cart context
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -47,11 +49,14 @@ const Navigation = () => {
                 <Heart className="h-5 w-5" />
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="relative">
+            {/* Updated Cart Button */}
+            <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
               <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Button>
 
             {/* Mobile menu button */}

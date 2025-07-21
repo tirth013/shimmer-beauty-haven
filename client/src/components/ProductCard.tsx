@@ -1,14 +1,14 @@
-// client/src/components/ProductCard.tsx
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import { toast } from '@/hooks/use-toast';
+import { formatRupees } from '@/lib/currency'; // Import the new currency formatter
 
 interface ProductCardProps {
     id: string;
@@ -39,6 +39,7 @@ const ProductCard = ({
 }: ProductCardProps) => {
     const { isAuthenticated, user, updateUser } = useAuth();
     const navigate = useNavigate();
+    const { addToCart } = useCart();
 
     const isLiked = user?.wishlist?.includes(id);
 
@@ -68,6 +69,18 @@ const ProductCard = ({
         }
     };
 
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCart({
+            id,
+            name,
+            price,
+            image,
+            quantity: 1,
+        });
+    };
+
     return (
         <Link to={`/product/${slug}`}>
             <Card className="group cursor-pointer hover:shadow-elegant transition-all duration-300 overflow-hidden h-full flex flex-col">
@@ -95,7 +108,7 @@ const ProductCard = ({
                         <Button variant="ghost" size="icon" className="bg-white/90 hover:bg-white" onClick={handleLikeClick}>
                             <Heart className={`h-4 w-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="bg-white/90 hover:bg-white">
+                        <Button variant="ghost" size="icon" className="bg-white/90 hover:bg-white" onClick={handleAddToCart}>
                             <ShoppingBag className="h-4 w-4" />
                         </Button>
                     </div>
@@ -121,10 +134,10 @@ const ProductCard = ({
                     </div>
 
                     <div className="flex items-center gap-2 mt-auto">
-                        <span className="font-semibold text-lg">${price.toFixed(2)}</span>
+                        <span className="font-semibold text-lg">{formatRupees(price)}</span>
                         {originalPrice && (
                             <span className="text-sm text-muted-foreground line-through">
-                                ${originalPrice.toFixed(2)}
+                                {formatRupees(originalPrice)}
                             </span>
                         )}
                     </div>

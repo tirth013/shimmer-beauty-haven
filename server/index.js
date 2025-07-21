@@ -10,6 +10,7 @@ const connectDb = require("./config/dbConnection");
 const userRouter = require("./routes/userRoute");
 const productRouter = require("./routes/productRoute");
 const categoryRouter = require("./routes/categoryRoute");
+const cartRouter = require("./routes/cartRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/category", categoryRouter);
+app.use("/api/cart", cartRouter);
 
 // Connect to DB and start server
 const startServer = async () => {
