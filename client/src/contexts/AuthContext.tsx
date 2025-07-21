@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
+import { useCart } from './CartContext'; // Import useCart
 
 interface User {
   _id: string;
@@ -43,12 +44,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const { fetchUserCart, clearCart } = useCart(); // Get cart functions
 
   const checkAuthStatus = async () => {
     try {
       setLoading(true);
       
-      // Check if tokens exist
       const accessToken = localStorage.getItem('accesstoken');
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       
@@ -58,7 +59,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // Verify with backend
       const response = await Axios({
         method: SummaryApi.userDetails.method,
         url: SummaryApi.userDetails.url,
@@ -67,12 +67,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.data.success) {
         setIsAuthenticated(true);
         setUser(response.data.data);
+        await fetchUserCart(); // Fetch cart if user is authenticated
       } else {
         throw new Error('Invalid session');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Clear invalid tokens
       localStorage.removeItem('accesstoken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('isLoggedIn');
@@ -90,7 +90,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Call backend logout
       await Axios({
         method: SummaryApi.logout.method,
         url: SummaryApi.logout.url,
@@ -98,15 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Logout API error:', error);
     } finally {
-      // Clear local storage regardless of API call success
       localStorage.removeItem('accesstoken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('shimmer_cart'); // Clear cart on logout
       setIsAuthenticated(false);
       setUser(null);
-      
-      // Dispatch event for other components
+      clearCart(); // Clear cart context state
       window.dispatchEvent(new Event('logoutStateChange'));
+      window.dispatchEvent(new Event('cartClear')); // Notify cart context to clear state
     }
   };
 
@@ -114,7 +113,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(userData);
   };
 
-  // Listen for login state changes from other components
   useEffect(() => {
     const handleLoginStateChange = () => {
       checkAuthStatus();
@@ -134,7 +132,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Check auth status on mount
   useEffect(() => {
     checkAuthStatus();
   }, []);

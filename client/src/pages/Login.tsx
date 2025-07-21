@@ -1,13 +1,12 @@
-
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
-import SummaryApi, { baseURL } from '../common/summaryApi';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Axios from '@/utils/Axios';
+import SummaryApi from '../common/summaryApi';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -16,6 +15,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { checkAuthStatus } = useAuth();
+  const { fetchUserCart } = useCart();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,13 +33,9 @@ const Login = () => {
       const response = await Axios({
         method: SummaryApi.login.method,
         url: SummaryApi.login.url,
-        data: {
-          email: form.email,
-          password: form.password,
-        },
+        data: form,
       });
       
-      // Store tokens
       if (response.data.data.accessToken) {
         localStorage.setItem('accesstoken', response.data.data.accessToken);
       }
@@ -48,11 +44,14 @@ const Login = () => {
       }
       localStorage.setItem('isLoggedIn', 'true');
       
-      // Dispatch events for auth context
-      window.dispatchEvent(new Event('loginStateChange'));
+      // Merge local cart BEFORE fetching the user's new cart
+      const localCart = JSON.parse(localStorage.getItem('shimmer_cart') || '[]');
+      if (localCart.length > 0) {
+        await Axios.post(SummaryApi.mergeCart.url, { localCart });
+        localStorage.removeItem('shimmer_cart'); // Clear local cart after merging
+      }
       
-      // Update auth context
-      await checkAuthStatus();
+      await checkAuthStatus(); // This will now also fetch the user's cart
       
       navigate('/');
     } catch (err: any) {

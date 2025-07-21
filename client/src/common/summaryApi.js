@@ -137,6 +137,27 @@ const SummaryApi = {
     url: "/api/user/wishlist",
     method: "get",
   },
+  // Cart Endpoints
+  getCart: {
+    url: "/api/cart",
+    method: "get",
+  },
+  addToCart: {
+    url: "/api/cart/add",
+    method: "post",
+  },
+  updateCart: {
+    url: "/api/cart", 
+    method: "put",
+  },
+  deleteFromCart: {
+    url: "/api/cart", 
+    method: "delete",
+  },
+  mergeCart: {
+    url: "/api/cart/merge",
+    method: "post",
+  },
 };
 
 export default SummaryApi;

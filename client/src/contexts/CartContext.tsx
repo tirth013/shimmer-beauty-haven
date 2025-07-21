@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { toast } from "@/hooks/use-toast";
+import Axios from '@/utils/Axios';
+import SummaryApi from '@/common/summaryApi';
 
-// Interface for a single cart item
 interface CartItem {
   id: string;
   name: string;
@@ -10,7 +11,6 @@ interface CartItem {
   image: string;
 }
 
-// Interface for the context's value
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
@@ -19,11 +19,12 @@ interface CartContextType {
   isCartOpen: boolean;
   toggleCart: () => void;
   cartCount: number;
+  fetchUserCart: () => Promise<void>;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Custom hook to use the cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -32,12 +33,11 @@ export const useCart = () => {
   return context;
 };
 
-// Provider component
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Load cart from local storage on initial render
+  // Load cart from local storage on initial render (for guests)
   useEffect(() => {
     const savedCart = localStorage.getItem('shimmer_cart');
     if (savedCart) {
@@ -45,14 +45,44 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Save cart to local storage whenever it changes
+  // Save cart to local storage whenever it changes (for guests)
   useEffect(() => {
-    localStorage.setItem('shimmer_cart', JSON.stringify(cartItems));
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      localStorage.setItem('shimmer_cart', JSON.stringify(cartItems));
+    }
   }, [cartItems]);
+  
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    localStorage.removeItem('shimmer_cart');
+  }, []);
 
-  const toggleCart = () => {
-    setIsCartOpen(prev => !prev);
+  // Listen for logout event to clear cart
+  useEffect(() => {
+    window.addEventListener('logoutStateChange', clearCart);
+    return () => window.removeEventListener('logoutStateChange', clearCart);
+  }, [clearCart]);
+
+  const fetchUserCart = async () => {
+    try {
+      const response = await Axios.get(SummaryApi.getCart.url);
+      if (response.data.success) {
+        const serverCart = response.data.data.map((item: any) => ({
+          id: item.productId._id,
+          name: item.productId.name,
+          price: item.productId.price,
+          quantity: item.quantity,
+          image: item.productId.images[0]?.url || '',
+        }));
+        setCartItems(serverCart);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user cart:", error);
+    }
   };
+
+  const toggleCart = () => setIsCartOpen(prev => !prev);
 
   const addToCart = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
     setCartItems(prevItems => {
@@ -94,6 +124,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         isCartOpen,
         toggleCart,
         cartCount,
+        fetchUserCart,
+        clearCart,
       }}
     >
       {children}

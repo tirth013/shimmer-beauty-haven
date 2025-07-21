@@ -110,8 +110,71 @@ const removeCartItem = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Item removed from cart." });
 });
 
+/**
+ * Merges a local guest cart with the user's server-side cart.
+ * @route POST /api/cart/merge
+ */
+const mergeCart = asyncHandler(async (req, res) => {
+    const { localCart } = req.body;
+    const userId = req.user._id;
+
+    if (!localCart || !Array.isArray(localCart)) {
+        return res.status(400).json({ success: false, message: "Local cart data is required." });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    for (const localItem of localCart) {
+        const existingCartItem = await CartProductModel.findOne({ userId, productId: localItem.id });
+
+        if (existingCartItem) {
+            existingCartItem.quantity += localItem.quantity;
+            await existingCartItem.save();
+        } else {
+            const newCartItem = new CartProductModel({
+                userId,
+                productId: localItem.id,
+                quantity: localItem.quantity,
+            });
+            await newCartItem.save();
+            user.shopping_cart.push(newCartItem);
+        }
+    }
+    await user.save();
+
+    res.json({ success: true, message: "Carts merged successfully." });
+});
+
+/**
+ * Gets the user's current shopping cart.
+ * @route GET /api/cart/
+ */
+const getCart = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const userWithCart = await UserModel.findById(userId).populate({
+        path: 'shopping_cart',
+        populate: {
+            path: 'productId',
+            model: 'Product'
+        }
+    });
+
+    if (!userWithCart) {
+        return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    res.json({ success: true, data: userWithCart.shopping_cart });
+});
+
+
 module.exports = {
-  addToCart,
-  updateCartItem,
-  removeCartItem,
+    addToCart,
+    updateCartItem,
+    removeCartItem,
+    mergeCart,
+    getCart, // Export the new function
 };

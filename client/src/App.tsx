@@ -4,8 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { CartProvider } from "@/contexts/CartContext"; // Import CartProvider
-import CartSidePanel from "@/components/CartSidePanel"; // Import CartSidePanel
+import { CartProvider } from "@/contexts/CartContext";
+import CartSidePanel from "@/components/CartSidePanel";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -29,12 +29,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <CartProvider> {/* Wrap with CartProvider */}
+      {/* --- CORRECTED ORDER --- */}
+      {/* CartProvider now wraps AuthProvider */}
+      <CartProvider>
+        <AuthProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <CartSidePanel /> {/* Add CartSidePanel here */}
+            <CartSidePanel />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/shop" element={<Shop />} />
@@ -54,8 +56,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </CartProvider>
+      {/* --- END CORRECTION --- */}
     </TooltipProvider>
   </QueryClientProvider>
 );
