@@ -13,6 +13,7 @@ import { Search, Filter, Edit, Trash2, Plus, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
+import { formatRupees } from '@/lib/currency'; // Import the new currency formatter
 
 interface Product {
   _id: string;
@@ -198,13 +199,6 @@ const ProductAdmin = () => {
     setSelectedProducts(prev => 
         checked ? [...prev, productId] : prev.filter(id => id !== productId)
     );
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-    }).format(price);
   };
 
   const generatePaginationItems = () => {
@@ -414,10 +408,10 @@ const ProductAdmin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium">{formatPrice(product.price)}</span>
+                          <span className="font-medium">{formatRupees(product.price)}</span>
                           {product.originalPrice && product.originalPrice > product.price && (
                             <span className="text-sm text-muted-foreground line-through">
-                              {formatPrice(product.originalPrice)}
+                              {formatRupees(product.originalPrice)}
                             </span>
                           )}
                         </div>

@@ -409,41 +409,49 @@ const UploadProduct = () => {
           </CardContent>
         </Card>
 
-        {/* Pricing */}
+        {/* Pricing Card - UPDATED */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Pricing
+              <span className="font-bold text-xl">₹</span>
+              Pricing (INR)
             </CardTitle>
             <CardDescription>
-              Set the pricing for your product
+              Set the pricing for your product in Indian Rupees (₹)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Price *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  placeholder="0.00"
-                  required
-                />
+                <Label htmlFor="price">Price (₹) *</Label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    placeholder="1,499.00"
+                    className="pl-7"
+                    required
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="originalPrice">Original Price (Optional)</Label>
-                <Input
-                  id="originalPrice"
-                  type="number"
-                  step="0.01"
-                  value={formData.originalPrice}
-                  onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
-                  placeholder="0.00"
-                />
+                <Label htmlFor="originalPrice">Original Price (₹) (Optional)</Label>
+                <div className="relative">
+                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                   <Input
+                    id="originalPrice"
+                    type="number"
+                    step="0.01"
+                    value={formData.originalPrice}
+                    onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
+                    placeholder="1,999.00"
+                    className="pl-7"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
