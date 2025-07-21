@@ -6,6 +6,7 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
+  bulkDeleteProducts,
   getProductsByCategory,
   searchProducts,
   getFeaturedProducts,
@@ -24,6 +25,7 @@ router.route("/:identifier").get(getProductById);
 
 // Admin-only routes (require authentication and admin privileges)
 router.route("/create").post(auth, adminOnly, upload.array("images", 10), createProduct);
+router.route("/bulk-delete").delete(auth, adminOnly, bulkDeleteProducts);
 router.route("/:id").put(auth, adminOnly, upload.array("images", 10), updateProduct);
 router.route("/:id").delete(auth, adminOnly, deleteProduct);
 

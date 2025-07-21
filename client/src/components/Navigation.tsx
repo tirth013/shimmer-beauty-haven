@@ -5,17 +5,11 @@ import { ShoppingBag, Search, Menu, X, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserDropdown from "@/components/UserDropdown";
 import SearchDropdown from './ui/SearchDropdown';
+import { navItems } from "@/common/navConfig";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
-  const navItems = [
-    { name: "Skincare", href: "/skincare" },
-    { name: "Makeup", href: "/makeup" },
-    { name: "Fragrance", href: "/fragrance" },
-    { name: "About", href: "/about" },
-  ];
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">

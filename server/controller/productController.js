@@ -430,6 +430,35 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Bulk delete products (Admin only)
+ * @route DELETE /api/product/bulk-delete
+ */
+const bulkDeleteProducts = asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "Product IDs must be provided as a non-empty array.",
+        });
+    }
+
+    const result = await ProductModel.deleteMany({ _id: { $in: ids } });
+
+    if (result.deletedCount === 0) {
+        return res.status(404).json({
+            success: false,
+            message: "No products found with the provided IDs.",
+        });
+    }
+
+    return res.json({
+        success: true,
+        message: `${result.deletedCount} products deleted successfully.`,
+    });
+});
+
+/**
  * Get products by category ID or slug
  * @route GET /api/product/category/:categoryId
  * @description This function now correctly handles both MongoDB ObjectIDs and URL-friendly slugs.
@@ -583,6 +612,7 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
+  bulkDeleteProducts,
   getProductsByCategory,
   searchProducts,
   getFeaturedProducts,

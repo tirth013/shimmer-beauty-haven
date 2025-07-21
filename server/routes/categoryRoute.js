@@ -6,6 +6,7 @@ const {
   getCategoryById,
   updateCategory,
   deleteCategory,
+  bulkDeleteCategories,
   getCategoryHierarchy,
   searchCategories,
 } = require("../controller/categoryController");
@@ -22,6 +23,7 @@ router.route("/:identifier").get(getCategoryById);
 
 // Admin-only routes (require authentication and admin privileges)
 router.route("/create").post(auth, adminOnly, upload.single("image"), createCategory);
+router.route("/bulk-delete").delete(auth, adminOnly, bulkDeleteCategories);
 router.route("/:id").put(auth, adminOnly, upload.single("image"), updateCategory);
 router.route("/:id").delete(auth, adminOnly, deleteCategory);
 

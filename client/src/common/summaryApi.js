@@ -88,6 +88,10 @@ const SummaryApi = {
     url: "/api/category",
     method: "delete",
   },
+  bulkDeleteCategories: {
+    url: "/api/category/bulk-delete",
+    method: "delete",
+  },
   // Product endpoints
   getAllProducts: {
     url: "/api/product/all",
@@ -119,6 +123,10 @@ const SummaryApi = {
   },
   deleteProduct: {
     url: "/api/product",
+    method: "delete",
+  },
+  bulkDeleteProducts: {
+    url: "/api/product/bulk-delete",
     method: "delete",
   },
   toggleWishlist: {

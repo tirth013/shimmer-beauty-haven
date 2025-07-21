@@ -7,8 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Search, Filter, Edit, Trash2, Plus, Package, Star, DollarSign, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Search, Filter, Edit, Trash2, Plus, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
@@ -49,6 +50,7 @@ interface PaginationData {
 
 const ProductAdmin = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -72,6 +74,11 @@ const ProductAdmin = () => {
     fetchProducts();
     fetchCategories();
   }, [currentPage, searchTerm, categoryFilter, statusFilter, sortBy, sortOrder]);
+  
+  useEffect(() => {
+    setSelectedProducts([]);
+  }, [products]);
+
 
   const fetchCategories = async () => {
     try {
@@ -145,11 +152,52 @@ const ProductAdmin = () => {
       });
     }
   };
+  
+  const handleBulkDelete = async () => {
+    try {
+        const response = await Axios({
+            method: SummaryApi.bulkDeleteProducts.method,
+            url: SummaryApi.bulkDeleteProducts.url,
+            data: { ids: selectedProducts },
+        });
+
+        if (response.data.success) {
+            toast({
+                title: "Success",
+                description: response.data.message,
+            });
+            setSelectedProducts([]);
+            fetchProducts();
+        }
+    } catch (error: any) {
+        console.error('Error bulk deleting products:', error);
+        toast({
+            title: "Error",
+            description: error.response?.data?.message || "Failed to delete products",
+            variant: "destructive",
+        });
+    }
+  };
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
     fetchProducts();
+  };
+  
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
+        setSelectedProducts(products.map(p => p._id));
+    } else {
+        setSelectedProducts([]);
+    }
+  };
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    setSelectedProducts(prev => 
+        checked ? [...prev, productId] : prev.filter(id => id !== productId)
+    );
   };
 
   const formatPrice = (price: number) => {
@@ -195,7 +243,6 @@ const ProductAdmin = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Product Management</h1>
           <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
-        {/* Corrected the link to point to the correct admin route for uploading products */}
         <Link to="/admin/product-admin/upload">
           <Button className="bg-gradient-luxury">
             <Plus className="mr-2 h-4 w-4" />
@@ -204,18 +251,51 @@ const ProductAdmin = () => {
         </Link>
       </div>
 
-      {/* Stats Cards and the rest of the component... */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Products
-          </CardTitle>
-          <CardDescription>
-            Manage your product inventory and details
-          </CardDescription>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Products
+              </CardTitle>
+              <CardDescription>
+                Manage your product inventory and details
+              </CardDescription>
+            </div>
+            {selectedProducts.length > 0 && (
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{selectedProducts.length} selected</span>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Selected
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete {selectedProducts.length} products. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleBulkDelete}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            )}
+          </div>
           
-          <div className="flex flex-wrap gap-4 items-center">
+          <div className="flex flex-wrap gap-4 items-center pt-4">
             <form onSubmit={handleSearch} className="flex-1 relative min-w-[200px]">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -281,6 +361,19 @@ const ProductAdmin = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]">
+                       <Checkbox
+                            checked={
+                                selectedProducts.length > 0 && selectedProducts.length === products.length
+                                ? true
+                                : selectedProducts.length > 0
+                                ? 'indeterminate'
+                                : false
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all"
+                        />
+                    </TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
@@ -292,7 +385,14 @@ const ProductAdmin = () => {
                 </TableHeader>
                 <TableBody>
                   {products.map((product) => (
-                    <TableRow key={product._id}>
+                    <TableRow key={product._id} data-state={selectedProducts.includes(product._id) && "selected"}>
+                      <TableCell>
+                          <Checkbox
+                              checked={selectedProducts.includes(product._id)}
+                              onCheckedChange={(checked) => handleSelectProduct(product._id, !!checked)}
+                              aria-label={`Select product ${product.name}`}
+                          />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-lg overflow-hidden border">
@@ -333,7 +433,6 @@ const ProductAdmin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          {/* Corrected the edit link to point to the correct admin route */}
                           <Link to={`/admin/product-admin/upload?edit=${product._id}`}>
                             <Button variant="outline" size="sm">
                               <Edit className="h-4 w-4" />

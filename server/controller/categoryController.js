@@ -1,5 +1,6 @@
 // categoryController.js file
 const CategoryModel = require("../models/categoryModel");
+const ProductModel = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const uploadImageCloudinary = require("../utils/uploadImageCloudinary");
 
@@ -299,6 +300,53 @@ const deleteCategory = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Bulk delete categories (Admin only)
+ * @route DELETE /api/category/bulk-delete
+ */
+const bulkDeleteCategories = asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "Category IDs must be provided as a non-empty array.",
+        });
+    }
+
+    // Validation: Check if any categories are in use
+    const subcategoryCheck = await CategoryModel.findOne({ parentCategory: { $in: ids } });
+    if (subcategoryCheck) {
+        return res.status(400).json({
+            success: false,
+            message: `Cannot delete because category "${subcategoryCheck.name}" is a parent to other categories.`,
+        });
+    }
+
+    const productCheck = await ProductModel.findOne({ category: { $in: ids } });
+    if (productCheck) {
+        return res.status(400).json({
+            success: false,
+            message: `Cannot delete because at least one category is assigned to a product (e.g., "${productCheck.name}").`,
+        });
+    }
+
+    const result = await CategoryModel.deleteMany({ _id: { $in: ids } });
+
+    if (result.deletedCount === 0) {
+        return res.status(404).json({
+            success: false,
+            message: "No categories found with the provided IDs.",
+        });
+    }
+
+    return res.json({
+        success: true,
+        message: `${result.deletedCount} categories deleted successfully.`,
+    });
+});
+
+
+/**
  * Get category hierarchy (parent categories with their subcategories)
  * @route GET /api/category/hierarchy
  */
@@ -352,6 +400,7 @@ module.exports = {
   getCategoryById,
   updateCategory,
   deleteCategory,
+  bulkDeleteCategories,
   getCategoryHierarchy,
   searchCategories,
 };

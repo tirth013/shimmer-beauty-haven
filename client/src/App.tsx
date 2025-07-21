@@ -12,9 +12,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import OtpVerification from "./pages/OtpVerification";
 import ResetPassword from "./pages/ResetPassword";
 import Shop from "./pages/Shop";
-import Skincare from "./pages/Skincare";
-import Makeup from "./pages/Makeup";
-import Fragrance from "./pages/Fragrance";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import AdminRoute from "./AdminRoute";
@@ -37,9 +34,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shop" element={<Shop />} />
-            <Route path="/skincare" element={<Skincare />} />
-            <Route path="/makeup" element={<Makeup />} />
-            <Route path="/fragrance" element={<Fragrance />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
