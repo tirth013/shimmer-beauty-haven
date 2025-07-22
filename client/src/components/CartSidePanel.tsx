@@ -86,13 +86,15 @@ const CartSidePanel = () => {
           <>
             <Separator />
             <SheetFooter className="px-6 py-4 space-y-4 bg-background">
-              <div className="flex justify-between items-center font-semibold text-lg">
-                <span>Subtotal</span>
-                <span>{formatRupees(subtotal)}</span>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center font-semibold text-lg mb-2">
+                  <span>Subtotal</span>
+                  <span>{formatRupees(subtotal)}</span>
+                </div>
+                <Button asChild size="lg" className="w-full bg-gradient-luxury shadow-lg hover:scale-105 transition-transform">
+                  <Link to="/checkout">Proceed to Checkout</Link>
+                </Button>
               </div>
-              <Button asChild size="lg" className="w-full bg-gradient-luxury shadow-lg hover:scale-105 transition-transform">
-                <Link to="/checkout">Proceed to Checkout</Link>
-              </Button>
             </SheetFooter>
           </>
         )}
