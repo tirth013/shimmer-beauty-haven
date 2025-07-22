@@ -25,6 +25,11 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import Wishlist from "./pages/Wishlist";
 import AdminOverview from "./pages/AdminOverview";
 import { AdminLayout } from "./components/Layout";
+import ContactUs from "./pages/ContactUs";
+import FAQ from "./pages/FAQ";
+import ShippingInfo from "./pages/ShippingInfo";
+import Returns from "./pages/Returns";
+import SizeGuide from "./pages/SizeGuide";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +55,11 @@ const App = () => (
               <Route path="/category/:slug" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/contactus" element={<ContactUs />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/shipping-info" element={<ShippingInfo />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
 
               <Route
                 path="/admin"
