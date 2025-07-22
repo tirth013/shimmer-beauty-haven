@@ -234,26 +234,23 @@ const CategoryPage = () => {
   );
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <Button
-        variant="outline"
-        className="mb-4 flex items-center gap-2"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
-      </Button>
-      <div className="flex justify-between items-center mb-6">
+    <>
+      <div className="flex items-center justify-between space-y-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Category Management</h1>
-          <p className="text-muted-foreground">Manage product categories and subcategories</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Category Management
+          </h2>
+          <p className="text-muted-foreground">
+            Manage your product categories.
+          </p>
         </div>
-        <Button onClick={handleAddCategory} className="bg-gradient-luxury">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Category
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button onClick={handleAddCategory} className="bg-gradient-luxury">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        </div>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -430,7 +427,7 @@ const CategoryPage = () => {
         editingCategory={editingCategory}
         parentCategories={parentCategories}
       />
-    </div>
+    </>
   );
 };
 
