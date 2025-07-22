@@ -5,6 +5,7 @@ import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FaRupeeSign } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 interface OverviewStats {
   totalSales: number;
@@ -22,6 +23,7 @@ interface OverviewStats {
 const AdminOverview = () => {
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -42,16 +44,16 @@ const AdminOverview = () => {
   }, []);
 
   const summaryCards = [
-    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: FaRupeeSign, color: "bg-green-100 text-green-700" },
-    { title: "Pending Orders", value: stats?.pendingOrders, icon: Clock, color: "bg-yellow-100 text-yellow-700" },
-    { title: "Accepted Orders", value: stats?.acceptedOrders, icon: AlertTriangle, color: "bg-blue-100 text-blue-700" },
-    { title: "Rejected Orders", value: stats?.rejectedOrders, icon: XCircle, color: "bg-red-100 text-red-700" },
-    { title: "Completed Orders", value: stats?.completedOrders, icon: CheckCircle, color: "bg-purple-100 text-purple-700" },
-    { title: "Total Customers", value: stats?.totalCustomers, icon: Users, color: "bg-indigo-100 text-indigo-700" },
-    { title: "Total Categories", value: stats?.totalCategories, icon: Layers, color: "bg-pink-100 text-pink-700" },
-    { title: "Total Subcategories", value: stats?.totalSubcategories, icon: Layers, color: "bg-rose-100 text-rose-700" },
-    { title: "Total Brands", value: stats?.totalBrands, icon: Tag, color: "bg-teal-100 text-teal-700" },
-    { title: "Delivery Areas", value: stats?.deliveryAreas, icon: MapPin, color: "bg-orange-100 text-orange-700" },
+    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: FaRupeeSign, color: "bg-green-100 text-green-700", link: "/admin/product-admin" },
+    { title: "Pending Orders", value: stats?.pendingOrders, icon: Clock, color: "bg-yellow-100 text-yellow-700", link: "/admin/product-admin" },
+    { title: "Accepted Orders", value: stats?.acceptedOrders, icon: AlertTriangle, color: "bg-blue-100 text-blue-700", link: "/admin/product-admin" },
+    { title: "Rejected Orders", value: stats?.rejectedOrders, icon: XCircle, color: "bg-red-100 text-red-700", link: "/admin/product-admin" },
+    { title: "Completed Orders", value: stats?.completedOrders, icon: CheckCircle, color: "bg-purple-100 text-purple-700", link: "/admin/product-admin" },
+    { title: "Total Customers", value: stats?.totalCustomers, icon: Users, color: "bg-indigo-100 text-indigo-700", link: "/admin/product-admin" },
+    { title: "Total Categories", value: stats?.totalCategories, icon: Layers, color: "bg-pink-100 text-pink-700", link: "/admin/category-admin" },
+    { title: "Total Subcategories", value: stats?.totalSubcategories, icon: Layers, color: "bg-rose-100 text-rose-700", link: "/admin/category-admin" },
+    { title: "Total Brands", value: stats?.totalBrands, icon: Tag, color: "bg-teal-100 text-teal-700", link: "/admin/category-admin" },
+    { title: "Delivery Areas", value: stats?.deliveryAreas, icon: MapPin, color: "bg-orange-100 text-orange-700", link: "/admin/category-admin" },
   ];
 
   return (
@@ -73,7 +75,11 @@ const AdminOverview = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {summaryCards.map((card, index) => (
-            <Card key={index} className="border-muted hover:shadow-lg transition-shadow">
+            <Card 
+              key={index} 
+              className="border-muted hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => card.link && navigate(card.link)}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
                 <div className={`p-2 rounded-full ${card.color}`}>
