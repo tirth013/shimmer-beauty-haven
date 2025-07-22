@@ -1,5 +1,5 @@
-// categoryModel.js file
 const mongoose = require("mongoose");
+const slugify = require("slugify"); // It's good practice to use a library for consistency
 
 const categorySchema = new mongoose.Schema(
   {
@@ -10,14 +10,12 @@ const categorySchema = new mongoose.Schema(
       unique: true,
       maxlength: [50, "Category name cannot exceed 50 characters"],
     },
-
     slug: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
     },
-
     image: {
       public_id: {
         type: String,
@@ -28,7 +26,6 @@ const categorySchema = new mongoose.Schema(
         required: true,
       },
     },
-
     parentCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -40,17 +37,30 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-// Create slug from name before saving
+const generateSlug = (name) => {
+    return slugify(name, {
+        lower: true,
+        remove: /[*+~.()'"!:@]/g,
+        strict: true,
+    });
+};
+
+// Create slug from name before saving a NEW category
 categorySchema.pre("save", function (next) {
   if (this.isModified("name")) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
+    this.slug = generateSlug(this.name);
   }
   next();
 });
+
+categorySchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+  if (update.name) {
+    this.set({ slug: generateSlug(update.name) });
+  }
+  next();
+});
+
 
 // Virtual for subcategories
 categorySchema.virtual("subcategories", {

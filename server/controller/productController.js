@@ -1,8 +1,16 @@
-// server/controller/productController.js
 const ProductModel = require("../models/productModel");
 const CategoryModel = require("../models/categoryModel");
 const asyncHandler = require("express-async-handler");
 const uploadImageCloudinary = require("../utils/uploadImageCloudinary");
+const slugify = require("slugify");
+
+// Utility to generate a slug
+const generateSlug = (name) => {
+  return slugify(name, {
+    lower: true,
+    remove: /[*+~.()'"!:@]/g,
+  });
+};
 
 /**
  * Create a new product (Admin only)
@@ -27,12 +35,11 @@ const createProduct = asyncHandler(async (req, res) => {
     sku,
     specifications,
     tags,
-    isFeatured, // Added isFeatured to destructuring
+    isFeatured,
   } = req.body;
 
-  const images = req.files; // Multiple images
+  const images = req.files;
 
-  // Validate required fields
   if (!name || !description || !price || !category || !brand || !sku) {
     return res.status(400).json({
       success: false,
@@ -47,7 +54,6 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check if category exists
   const categoryExists = await CategoryModel.findById(category);
   if (!categoryExists) {
     return res.status(400).json({
@@ -56,7 +62,6 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check if SKU already exists
   const existingProduct = await ProductModel.findOne({ sku });
   if (existingProduct) {
     return res.status(409).json({
@@ -65,7 +70,6 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  // Upload images to Cloudinary
   let uploadedImages = [];
   try {
     for (let image of images) {
@@ -83,7 +87,6 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  // Parse specifications if it's a string
   let parsedSpecifications = specifications;
   if (typeof specifications === 'string') {
     try {
@@ -93,7 +96,6 @@ const createProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  // Parse tags if it's a string
   let parsedTags = tags;
   if (typeof tags === 'string') {
     try {
@@ -103,28 +105,27 @@ const createProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  // Create product
-  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  const slug = generateSlug(name);
   const productData = {
     name,
+    slug,
     description,
     shortDescription,
     price,
     originalPrice,
     category,
+    categorySlug: categoryExists.slug, // **FIX**: Added categorySlug
     brand,
     sku: sku.toUpperCase(),
     images: uploadedImages,
     specifications: parsedSpecifications || {},
     tags: parsedTags || [],
-    slug,
-    isFeatured: isFeatured === 'true', // Correctly handle the isFeatured flag
+    isFeatured: isFeatured === 'true',
   };
 
   const newProduct = new ProductModel(productData);
   await newProduct.save();
 
-  // Populate category details
   await newProduct.populate('category', 'name slug');
 
   return res.status(201).json({
@@ -133,7 +134,6 @@ const createProduct = asyncHandler(async (req, res) => {
     data: newProduct,
   });
 });
-
 
 /**
  * Get all products with advanced filtering, sorting, and pagination
@@ -145,35 +145,31 @@ const getAllProducts = asyncHandler(async (req, res) => {
     brand,
     minPrice,
     maxPrice,
-    minRating, // New filter for minimum rating
-    sortBy = 'createdAt', // Default sort field
-    sortOrder = 'desc', // Default sort order
+    minRating,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
     page = 1,
     limit = 10,
     search,
     isActive,
   } = req.query;
 
-  // Build filter object
   let filter = {};
 
   if (category) filter.category = category;
   if (brand) filter.brand = new RegExp(brand, 'i');
   if (isActive !== undefined) filter.isActive = isActive === 'true';
 
-  // Price range filter
   if (minPrice || maxPrice) {
     filter.price = {};
     if (minPrice) filter.price.$gte = Number(minPrice);
     if (maxPrice) filter.price.$lte = Number(maxPrice);
   }
 
-  // Minimum rating filter
   if (minRating) {
     filter['ratings.average'] = { $gte: Number(minRating) };
   }
 
-  // Search filter
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: 'i' } },
@@ -183,21 +179,16 @@ const getAllProducts = asyncHandler(async (req, res) => {
     ];
   }
 
-  // Build sort object
   let sort = {};
   if (sortBy === 'featured') {
-    // For 'featured', sort by isFeatured first, then by creation date
     sort.isFeatured = -1;
     sort.createdAt = -1;
   } else if (sortBy === 'rating') {
-    // Sort by average rating
     sort['ratings.average'] = sortOrder === 'asc' ? 1 : -1;
   } else {
-    // Default sorting for fields like 'price' or 'createdAt'
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
   }
 
-  // Pagination
   const skip = (page - 1) * limit;
 
   const products = await ProductModel.find(filter)
@@ -235,11 +226,9 @@ const getProductById = asyncHandler(async (req, res) => {
 
   let product;
 
-  // Check if identifier is a valid ObjectId
   if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
     product = await ProductModel.findById(identifier);
   } else {
-    // Search by slug
     product = await ProductModel.findOne({ slug: identifier });
   }
 
@@ -250,7 +239,6 @@ const getProductById = asyncHandler(async (req, res) => {
     });
   }
 
-  // Populate category details
   await product.populate('category', 'name slug');
 
   return res.json({
@@ -278,10 +266,10 @@ const updateProduct = asyncHandler(async (req, res) => {
     specifications,
     tags,
     isActive,
-    isFeatured, // Added isFeatured to destructuring
+    isFeatured,
   } = req.body;
 
-  const images = req.files; // New images if provided
+  const images = req.files;
 
   if (!req.body || typeof req.body !== "object") {
     return res.status(400).json({
@@ -300,19 +288,20 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   let updateFields = {};
 
-  // Update basic fields
-  if (name) updateFields.name = name;
+  if (name) {
+      updateFields.name = name;
+      updateFields.slug = generateSlug(name); // **FIX**: Update slug when name changes
+  }
   if (description) updateFields.description = description;
   if (shortDescription !== undefined) updateFields.shortDescription = shortDescription;
   if (price) updateFields.price = price;
   if (originalPrice !== undefined) updateFields.originalPrice = originalPrice;
   if (brand) updateFields.brand = brand;
   if (isActive !== undefined) updateFields.isActive = isActive === 'true';
-  if (isFeatured !== undefined) { // Correctly handle the isFeatured flag
+  if (isFeatured !== undefined) {
     updateFields.isFeatured = isFeatured === 'true';
   }
 
-  // Update category if provided
   if (category && category !== String(product.category)) {
     const categoryExists = await CategoryModel.findById(category);
     if (!categoryExists) {
@@ -322,13 +311,13 @@ const updateProduct = asyncHandler(async (req, res) => {
       });
     }
     updateFields.category = category;
+    updateFields.categorySlug = categoryExists.slug; // **FIX**: Update categorySlug
   }
 
-  // Update SKU if provided
   if (sku && sku !== product.sku) {
-    const existingProduct = await ProductModel.findOne({ 
-      sku: sku.toUpperCase(), 
-      _id: { $ne: id } 
+    const existingProduct = await ProductModel.findOne({
+      sku: sku.toUpperCase(),
+      _id: { $ne: id }
     });
     if (existingProduct) {
       return res.status(409).json({
@@ -339,7 +328,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateFields.sku = sku.toUpperCase();
   }
 
-  // Update specifications
   if (specifications) {
     let parsedSpecifications = specifications;
     if (typeof specifications === 'string') {
@@ -352,7 +340,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateFields.specifications = parsedSpecifications;
   }
 
-  // Update tags
   if (tags) {
     let parsedTags = tags;
     if (typeof tags === 'string') {
@@ -365,7 +352,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateFields.tags = parsedTags;
   }
 
-  // Update images if provided
   if (images && images.length > 0) {
     try {
       let uploadedImages = [];
@@ -461,16 +447,13 @@ const bulkDeleteProducts = asyncHandler(async (req, res) => {
 /**
  * Get products by category ID or slug
  * @route GET /api/product/category/:categoryId
- * @description This function now correctly handles both MongoDB ObjectIDs and URL-friendly slugs.
  */
 const getProductsByCategory = asyncHandler(async (req, res) => {
-  const { categoryId } = req.params; // This can be either an ID or a slug
+  const { categoryId } = req.params;
   const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
   let category;
 
-  // Check if the provided categoryId looks like a MongoDB ObjectId.
-  // If it does, search by ID. Otherwise, assume it's a slug.
   if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
     category = await CategoryModel.findById(categoryId);
   } else {
@@ -488,19 +471,18 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
   const sort = {};
   sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-  // Fetch products using the found category's actual _id
-  const products = await ProductModel.find({ 
-    category: category._id, 
-    isActive: true 
+  const products = await ProductModel.find({
+    category: category._id,
+    isActive: true
   })
     .populate('category', 'name slug')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit));
 
-  const totalProducts = await ProductModel.countDocuments({ 
-    category: category._id, 
-    isActive: true 
+  const totalProducts = await ProductModel.countDocuments({
+    category: category._id,
+    isActive: true
   });
   const totalPages = Math.ceil(totalProducts / limit);
 
@@ -591,9 +573,9 @@ const searchProducts = asyncHandler(async (req, res) => {
 const getFeaturedProducts = asyncHandler(async (req, res) => {
   const { limit = 8 } = req.query;
 
-  const products = await ProductModel.find({ 
-    isFeatured: true, 
-    isActive: true 
+  const products = await ProductModel.find({
+    isFeatured: true,
+    isActive: true
   })
     .populate('category', 'name slug')
     .sort({ createdAt: -1 })

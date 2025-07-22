@@ -46,7 +46,7 @@ const App = () => (
               <Route path="/otp-verification" element={<OtpVerification />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+              <Route path="/category/:slug" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
               <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
               <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />

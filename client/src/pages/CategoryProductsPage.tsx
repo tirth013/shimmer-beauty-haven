@@ -13,7 +13,7 @@ import { ArrowLeft } from 'lucide-react';
 interface Product {
   _id: string;
   name: string;
-  slug: string; // Added slug
+  slug: string;
   price: number;
   originalPrice?: number;
   images: Array<{ url: string }>;
@@ -30,28 +30,42 @@ interface Product {
 }
 
 const CategoryProductsPage = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  // This now correctly reads the 'slug' from the URL, as defined in your App.tsx router
+  const { slug } = useParams<{ slug: string }>(); 
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryName, setCategoryName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!categoryId) return;
+    // If slug is not present in the URL, stop loading and show an error.
+    if (!slug) {
+        setLoading(false);
+        setError("Category not specified in the URL.");
+        return;
+    }
 
     const fetchProductsByCategory = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await Axios.get(`${SummaryApi.getProductsByCategory.url}/${categoryId}`);
-        if (response.data.success) {
-          setProducts(response.data.data.products);
-          setCategoryName(response.data.data.category.name);
+        // This API call now uses the slug, which matches the backend controller.
+        const response = await Axios.get(`${SummaryApi.getProductsByCategory.url}/${slug}`);
+
+        // Check for a successful response and the presence of data
+        if (response.data && response.data.success && response.data.data) {
+          const productsData = response.data.data.products || [];
+          const categoryData = response.data.data.category;
+
+          setProducts(productsData);
+          setCategoryName(categoryData ? categoryData.name : 'Category');
         } else {
-          throw new Error('Failed to fetch products for this category.');
+          // If the API returns a non-success status, use its message
+          throw new Error(response.data.message || 'Failed to fetch products for this category.');
         }
       } catch (err) {
-        setError('Could not load products. Please try again later.');
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(`Could not load products. ${errorMessage}`);
         console.error('Error fetching products by category:', err);
       } finally {
         setLoading(false);
@@ -59,7 +73,7 @@ const CategoryProductsPage = () => {
     };
 
     fetchProductsByCategory();
-  }, [categoryId]);
+  }, [slug]); // The component will re-fetch data whenever the slug in the URL changes.
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,7 +91,7 @@ const CategoryProductsPage = () => {
               <Skeleton className="h-12 w-1/3" />
             ) : (
               <h1 className="font-playfair text-4xl md:text-5xl font-bold text-gray-900">
-                {categoryName}
+                {categoryName || "Category"}
               </h1>
             )}
           </div>
@@ -108,14 +122,14 @@ const CategoryProductsPage = () => {
                     <ProductCard
                       key={product._id}
                       id={product._id}
-                      slug={product.slug} // Passing the slug
+                      slug={product.slug}
                       name={product.name}
                       price={product.price}
                       originalPrice={product.originalPrice}
-                      image={product.images[0]?.url || ''}
-                      rating={product.ratings.average}
-                      reviews={product.ratings.numOfReviews}
-                      category={product.category.name}
+                      image={product.images && product.images[0] ? product.images[0].url : ''}
+                      rating={product.ratings ? product.ratings.average : 0}
+                      reviews={product.ratings ? product.ratings.numOfReviews : 0}
+                      category={product.category ? product.category.name : ''}
                       isSale={!!(product.originalPrice && product.originalPrice > product.price)}
                       isNew={isNew}
                     />

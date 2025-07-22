@@ -1,5 +1,5 @@
-// productModel.js file
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const productSchema = new mongoose.Schema(
   {
@@ -9,44 +9,43 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Product name cannot exceed 100 characters"],
     },
-
     description: {
       type: String,
       required: [true, "Product description is required"],
       trim: true,
       maxlength: [2000, "Description cannot exceed 2000 characters"],
     },
-
     shortDescription: {
       type: String,
       trim: true,
       maxlength: [300, "Short description cannot exceed 300 characters"],
     },
-
     price: {
       type: Number,
       required: [true, "Price is required"],
       min: [0, "Price cannot be negative"],
     },
-
     originalPrice: {
       type: Number,
       min: [0, "Original price cannot be negative"],
     },
-
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: [true, "Category is required"],
     },
-
+    // **FIX ADDED**: Storing the category slug on the product
+    categorySlug: {
+        type: String,
+        required: [true, "Category slug is required"],
+        lowercase: true,
+    },
     brand: {
       type: String,
       required: [true, "Brand is required"],
       trim: true,
       maxlength: [50, "Brand name cannot exceed 50 characters"],
     },
-
     sku: {
       type: String,
       required: [true, "SKU is required"],
@@ -54,7 +53,6 @@ const productSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
-
     images: [
       {
         public_id: {
@@ -67,40 +65,17 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
-
     specifications: {
-      volume: {
-        type: String, // e.g., "250ml", "500ml"
-        trim: true,
-      },
-      ingredients: [
-        {
-          type: String,
-          trim: true,
-        },
-      ],
+      volume: { type: String, trim: true },
+      ingredients: [{ type: String, trim: true }],
       skinType: {
         type: String,
-        enum: [
-          "Normal",
-          "Dry",
-          "Oily",
-          "Combination",
-          "Sensitive",
-          "All Types",
-        ],
+        enum: ["Normal", "Dry", "Oily", "Combination", "Sensitive", "All Types"],
         default: "All Types",
       },
       hairType: {
         type: String,
-        enum: [
-          "Normal",
-          "Dry",
-          "Oily",
-          "Damaged",
-          "Color-Treated",
-          "All Types",
-        ],
+        enum: ["Normal", "Dry", "Oily", "Damaged", "Color-Treated", "All Types"],
         default: "All Types",
       },
       suitableFor: {
@@ -108,29 +83,11 @@ const productSchema = new mongoose.Schema(
         enum: ["Men", "Women", "Unisex"],
         default: "Unisex",
       },
-      fragrance: {
-        type: String,
-        trim: true,
-      },
+      fragrance: { type: String, trim: true },
     },
-
-    tags: [
-      {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-    ],
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    isFeatured: {
-      type: Boolean,
-      default: false,
-    },
-
+    tags: [{ type: String, trim: true, lowercase: true }],
+    isActive: { type: Boolean, default: true },
+    isFeatured: { type: Boolean, default: false },
     ratings: {
       average: {
         type: Number,
@@ -144,7 +101,6 @@ const productSchema = new mongoose.Schema(
         min: [0, "Number of reviews cannot be negative"],
       },
     },
-
     slug: {
       type: String,
       required: true,
@@ -160,11 +116,11 @@ const productSchema = new mongoose.Schema(
 // Create slug from name before saving
 productSchema.pre("save", function (next) {
   if (this.isModified("name")) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
+    this.slug = slugify(this.name, {
+        lower: true,
+        remove: /[*+~.()'"!:@]/g,
+        strict: true,
+    });
   }
   next();
 });
