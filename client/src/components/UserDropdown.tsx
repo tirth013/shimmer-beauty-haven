@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogIn, UserPlus, LogOut, Settings, UserIcon, LayoutGrid, Package } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, Settings, UserIcon, LayoutGrid, Package, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import isAdmin from '@/utils/isAdmin';
 
@@ -61,14 +61,19 @@ const UserDropdown = () => {
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
-                {/* Corrected the link to point to the admin categories page */}
+                {/* Link to the new Admin Overview page */}
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/overview" className="flex items-center cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Overview</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/admin/category-admin" className="flex items-center cursor-pointer">
                     <LayoutGrid className="mr-2 h-4 w-4" />
                     <span>Manage Categories</span>
                   </Link>
                 </DropdownMenuItem>
-                {/* Corrected the link to point to the admin products page */}
                 <DropdownMenuItem asChild>
                   <Link to="/admin/product-admin" className="flex items-center cursor-pointer">
                     <Package className="mr-2 h-4 w-4" />
@@ -110,4 +115,4 @@ const UserDropdown = () => {
   );
 };
 
-export default UserDropdown;
+export default UserDropdown;  

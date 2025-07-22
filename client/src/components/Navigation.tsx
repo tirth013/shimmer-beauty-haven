@@ -6,12 +6,15 @@ import { cn } from "@/lib/utils";
 import UserDropdown from "@/components/UserDropdown";
 import SearchDropdown from './ui/SearchDropdown';
 import { navItems } from "@/common/navConfig";
-import { useCart } from "@/contexts/CartContext"; // Import useCart
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from '@/contexts/AuthContext';
+import isAdmin from '@/utils/isAdmin';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { toggleCart, cartCount } = useCart(); // Use the cart context
+  const { toggleCart, cartCount } = useCart();
+  const { user } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -33,6 +36,15 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            {/* Admin link for desktop */}
+            {isAdmin(user?.role) && (
+              <Link
+                to="/admin/overview"
+                className="text-foreground hover:text-primary transition-colors font-medium"
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Right side icons */}
@@ -49,7 +61,6 @@ const Navigation = () => {
                 <Heart className="h-5 w-5" />
               </Button>
             </Link>
-            {/* Updated Cart Button */}
             <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
@@ -87,6 +98,16 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            {/* Admin link for mobile */}
+            {isAdmin(user?.role) && (
+              <Link
+                to="/admin/overview"
+                className="block text-foreground hover:text-primary transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
             <div className="pt-4 border-t">
               <Button variant="ghost" className="w-full justify-start">
                 <Search className="h-5 w-5 mr-2" />

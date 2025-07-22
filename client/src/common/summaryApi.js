@@ -162,6 +162,10 @@ const SummaryApi = {
     url: `${baseURL}/api/auth/google`,
     method: "get",
   },
+  adminOverview: {
+    url: "/api/admin/overview",
+    method: "get",
+  },
 };
 
 export default SummaryApi;

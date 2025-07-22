@@ -11,10 +11,11 @@ const userRouter = require("./routes/userRoute");
 const productRouter = require("./routes/productRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const cartRouter = require("./routes/cartRoute");
+const adminRouter = require("./routes/adminRoute"); 
 const session = require('express-session');
 const passport = require('passport');
-require('./config/passport-setup'); // Import passport config
-const authRouter = require("./routes/authRoute"); // Import auth routes
+require('./config/passport-setup'); 
+const authRouter = require("./routes/authRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +25,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:5173", // Updated to match Vite dev server port
+    origin: "http://localhost:5173", 
   })
 );
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
@@ -50,11 +51,12 @@ app.use(passport.session());
 app.get("/", (req, res) => {
   res.send("API is running!");
 });
-app.use("/api/auth", authRouter); // Add auth routes
+app.use("/api/auth", authRouter); 
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/admin", adminRouter); 
 
 // Connect to DB and start server
 const startServer = async () => {

@@ -23,14 +23,13 @@ import ProductAdmin from "./pages/ProductAdmin";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Wishlist from "./pages/Wishlist";
+import AdminOverview from "./pages/AdminOverview";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* --- CORRECTED ORDER --- */}
-      {/* CartProvider now wraps AuthProvider */}
       <CartProvider>
         <AuthProvider>
           <Toaster />
@@ -49,6 +48,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
+              <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
               <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
               <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
               <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
