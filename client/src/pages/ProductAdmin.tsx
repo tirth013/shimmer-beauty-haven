@@ -223,28 +223,26 @@ const ProductAdmin = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-4">
-        <Link to="/">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
-        </Link>
-      </div>
-      <div className="flex justify-between items-center mb-6">
+    <>
+      <div className="flex items-center justify-between space-y-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Product Management</h1>
-          <p className="text-muted-foreground">Manage your product catalog</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Product Management
+          </h2>
+          <p className="text-muted-foreground">
+            Manage your product catalog.
+          </p>
         </div>
-        <Link to="/admin/product-admin/upload">
-          <Button className="bg-gradient-luxury">
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={() => navigate("/admin/product/upload")}
+            className="bg-gradient-luxury"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Button>
-        </Link>
+        </div>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -427,7 +425,7 @@ const ProductAdmin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Link to={`/admin/product-admin/upload?edit=${product._id}`}>
+                          <Link to={`/admin/product/upload?edit=${product._id}`}>
                             <Button variant="outline" size="sm">
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -488,7 +486,7 @@ const ProductAdmin = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };
 

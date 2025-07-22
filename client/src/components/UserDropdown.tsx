@@ -69,13 +69,13 @@ const UserDropdown = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/admin/category-admin" className="flex items-center cursor-pointer">
+                  <Link to="/admin/category" className="flex items-center cursor-pointer">
                     <LayoutGrid className="mr-2 h-4 w-4" />
                     <span>Manage Categories</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/admin/product-admin" className="flex items-center cursor-pointer">
+                  <Link to="/admin/product" className="flex items-center cursor-pointer">
                     <Package className="mr-2 h-4 w-4" />
                     <span>Manage Products</span>
                   </Link>

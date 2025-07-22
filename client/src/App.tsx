@@ -24,6 +24,12 @@ import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Wishlist from "./pages/Wishlist";
 import AdminOverview from "./pages/AdminOverview";
+import { AdminLayout } from "./components/Layout";
+import ContactUs from "./pages/ContactUs";
+import FAQ from "./pages/FAQ";
+import ShippingInfo from "./pages/ShippingInfo";
+import Returns from "./pages/Returns";
+import SizeGuide from "./pages/SizeGuide";
 
 const queryClient = new QueryClient();
 
@@ -48,11 +54,27 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/category/:slug" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
-              <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
-              <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
-              <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
-              <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
               <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/contactus" element={<ContactUs />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/shipping-info" element={<ShippingInfo />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
+
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }
+              >
+                <Route path="overview" element={<AdminOverview />} />
+                <Route path="category" element={<CategoryAdmin />} />
+                <Route path="product" element={<ProductAdmin />} />
+                <Route path="product/upload" element={<UploadProduct />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
