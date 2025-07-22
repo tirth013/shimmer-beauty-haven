@@ -4,6 +4,7 @@ import { DollarSign, ShoppingCart, Users, Layers, Tag, MapPin, CheckCircle, Aler
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FaRupeeSign } from 'react-icons/fa';
 
 interface OverviewStats {
   totalSales: number;
@@ -41,7 +42,7 @@ const AdminOverview = () => {
   }, []);
 
   const summaryCards = [
-    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: DollarSign, color: "bg-green-100 text-green-700" },
+    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: FaRupeeSign, color: "bg-green-100 text-green-700" },
     { title: "Pending Orders", value: stats?.pendingOrders, icon: Clock, color: "bg-yellow-100 text-yellow-700" },
     { title: "Accepted Orders", value: stats?.acceptedOrders, icon: AlertTriangle, color: "bg-blue-100 text-blue-700" },
     { title: "Rejected Orders", value: stats?.rejectedOrders, icon: XCircle, color: "bg-red-100 text-red-700" },

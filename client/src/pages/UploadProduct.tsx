@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { Upload, X, Plus, ArrowLeft, Save, Package, Image as ImageIcon, Tag, DollarSign } from 'lucide-react';
+import { Upload, X, Plus, ArrowLeft, Save, Package, Image as ImageIcon, Tag } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Axios from '@/utils/Axios';
 import SummaryApi from '@/common/summaryApi';
