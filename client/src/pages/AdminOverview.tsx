@@ -44,16 +44,16 @@ const AdminOverview = () => {
   }, []);
 
   const summaryCards = [
-    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: FaRupeeSign, color: "bg-green-100 text-green-700", link: "/admin/product-admin" },
-    { title: "Pending Orders", value: stats?.pendingOrders, icon: Clock, color: "bg-yellow-100 text-yellow-700", link: "/admin/product-admin" },
-    { title: "Accepted Orders", value: stats?.acceptedOrders, icon: AlertTriangle, color: "bg-blue-100 text-blue-700", link: "/admin/product-admin" },
-    { title: "Rejected Orders", value: stats?.rejectedOrders, icon: XCircle, color: "bg-red-100 text-red-700", link: "/admin/product-admin" },
-    { title: "Completed Orders", value: stats?.completedOrders, icon: CheckCircle, color: "bg-purple-100 text-purple-700", link: "/admin/product-admin" },
+    { title: "Total Sales", value: stats?.totalSales.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }), icon: FaRupeeSign, color: "bg-green-100 text-green-700", link: "/admin/orders/completed" },
+    { title: "Pending Orders", value: stats?.pendingOrders, icon: Clock, color: "bg-yellow-100 text-yellow-700", link: "/admin/orders/pending" },
+    { title: "Accepted Orders", value: stats?.acceptedOrders, icon: AlertTriangle, color: "bg-blue-100 text-blue-700", link: "/admin/orders/accepted" },
+    { title: "Rejected Orders", value: stats?.rejectedOrders, icon: XCircle, color: "bg-red-100 text-red-700", link: "/admin/orders/rejected" },
+    { title: "Completed Orders", value: stats?.completedOrders, icon: CheckCircle, color: "bg-purple-100 text-purple-700", link: "/admin/orders/completed" },
     { title: "Total Customers", value: stats?.totalCustomers, icon: Users, color: "bg-indigo-100 text-indigo-700", link: "/admin/product-admin" },
     { title: "Total Categories", value: stats?.totalCategories, icon: Layers, color: "bg-pink-100 text-pink-700", link: "/admin/category-admin" },
     { title: "Total Subcategories", value: stats?.totalSubcategories, icon: Layers, color: "bg-rose-100 text-rose-700", link: "/admin/category-admin" },
     { title: "Total Brands", value: stats?.totalBrands, icon: Tag, color: "bg-teal-100 text-teal-700", link: "/admin/category-admin" },
-    { title: "Delivery Areas", value: stats?.deliveryAreas, icon: MapPin, color: "bg-orange-100 text-orange-700", link: "/admin/category-admin" },
+    { title: "Delivery Areas", value: stats?.deliveryAreas, icon: MapPin, color: "bg-orange-100 text-orange-700", link: "/admin/delivery-areas" },
   ];
 
   return (
