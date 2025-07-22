@@ -159,26 +159,26 @@ const ProductDetailPage = () => {
             <Navigation />
             <div className="container mx-auto px-4 py-12">
                 {/* Breadcrumbs */}
-                <div className="flex items-center text-sm text-muted-foreground mb-6">
+                <div className="flex flex-wrap items-center text-sm text-muted-foreground mb-6 gap-1">
                     <Link to="/" className="hover:text-primary">Home</Link>
                     <ChevronRight className="h-4 w-4 mx-1" />
                     <Link to={`/category/${product.category.slug}`} className="hover:text-primary">{product.category.name}</Link>
                     <ChevronRight className="h-4 w-4 mx-1" />
-                    <span className="text-foreground font-medium">{product.name}</span>
+                    <span className="text-foreground font-medium break-all">{product.name}</span>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-12 items-start">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
                     {/* Image Gallery */}
-                    <div className="sticky top-24">
+                    <div className="sticky md:static top-24">
                         <div className="w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4 bg-white">
                             <img src={selectedImage} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2">
                             {product.images.map((image) => (
                                 <div
                                     key={image.public_id}
                                     onClick={() => setSelectedImage(image.url)}
-                                    className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImage === image.url ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
+                                    className={`w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImage === image.url ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
                                 >
                                     <img src={image.url} alt={`${product.name} thumbnail`} className="w-full h-full object-cover" />
                                 </div>
@@ -187,11 +187,11 @@ const ProductDetailPage = () => {
                     </div>
 
                     {/* Product Details */}
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <Badge variant="secondary">{product.brand}</Badge>
-                        <h1 className="font-playfair text-4xl font-bold text-foreground">{product.name}</h1>
+                        <h1 className="font-playfair text-2xl md:text-4xl font-bold text-foreground break-words">{product.name}</h1>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-2 md:gap-4">
                             <div className="flex items-center">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} className={`h-5 w-5 ${i < Math.floor(product.ratings.average) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
@@ -200,21 +200,21 @@ const ProductDetailPage = () => {
                             <span className="text-muted-foreground text-sm">({product.ratings.numOfReviews} reviews)</span>
                         </div>
 
-                        <p className="text-muted-foreground text-lg leading-relaxed">{product.description.split('.')[0]}.</p>
+                        <p className="text-muted-foreground text-base md:text-lg leading-relaxed break-words">{product.description.split('.')[0]}.</p>
 
-                        <div className="flex items-baseline gap-3">
-                            <span className="text-4xl font-bold text-primary">{formatRupees(product.price)}</span>
+                        <div className="flex flex-wrap items-baseline gap-2 md:gap-3">
+                            <span className="text-2xl md:text-4xl font-bold text-primary">{formatRupees(product.price)}</span>
                             {product.originalPrice && (
-                                <span className="text-xl text-muted-foreground line-through">{formatRupees(product.originalPrice)}</span>
+                                <span className="text-lg md:text-xl text-muted-foreground line-through">{formatRupees(product.originalPrice)}</span>
                             )}
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center border rounded-lg">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
+                            <div className="flex items-center border rounded-lg w-max mx-auto sm:mx-0">
                                 <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
-                                <span className="w-12 text-center font-semibold">{quantity}</span>
+                                <span className="w-10 md:w-12 text-center font-semibold">{quantity}</span>
                                 <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)}>
                                     <Plus className="h-4 w-4" />
                                 </Button>
