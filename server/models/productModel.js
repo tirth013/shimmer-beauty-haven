@@ -154,10 +154,16 @@ productSchema.set("toJSON", { virtuals: true });
 productSchema.set("toObject", { virtuals: true });
 
 // Index for better search performance
-productSchema.index({ name: "text", description: "text", brand: "text" });
-productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ name: "text", description: "text", brand: "text", tags: "text" });
+
+// Compound index for filtering and sorting products on the shop page
+productSchema.index({ category: 1, isActive: 1, price: 1, "ratings.average": -1 });
+
+// Index for featured products
+productSchema.index({ isFeatured: 1, isActive: 1 });
+
+// Index for brand-specific queries
 productSchema.index({ brand: 1, isActive: 1 });
-productSchema.index({ price: 1 });
-productSchema.index({ ratings: 1 });
+
 
 module.exports = mongoose.model("Product", productSchema);

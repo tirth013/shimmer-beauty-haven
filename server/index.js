@@ -2,6 +2,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
@@ -19,6 +20,9 @@ const authRouter = require("./routes/authRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Apply compression middleware
+app.use(compression());
 
 // Middleware (for JSON parsing)
 app.use(express.json({ limit: "10mb" }));
