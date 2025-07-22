@@ -17,6 +17,11 @@ const passport = require('passport');
 require('./config/passport-setup'); 
 const authRouter = require("./routes/authRoute");
 const compression = require("compression");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const fs = require("fs");
+const https = require("https");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +54,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 // --- End Passport Middleware ---
 
+// Rate limiting middleware (e.g., 100 requests per 15 minutes per IP)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: {
+    success: false,
+    message: "Too many requests from this IP, please try again later."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// Data sanitization against NoSQL injection
+app.use(mongoSanitize());
+// Data sanitization against XSS
+app.use(xss());
+
 // Example route
 app.get("/", (req, res) => {
   res.send("API is running!");
@@ -63,9 +86,20 @@ app.use("/api/admin", adminRouter);
 // Connect to DB and start server
 const startServer = async () => {
   await connectDb();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  if (process.env.NODE_ENV === "production" && process.env.SSL_KEY && process.env.SSL_CERT) {
+    // HTTPS/SSL in production
+    const sslOptions = {
+      key: fs.readFileSync(process.env.SSL_KEY),
+      cert: fs.readFileSync(process.env.SSL_CERT),
+    };
+    https.createServer(sslOptions, app).listen(PORT, () => {
+      console.log(`HTTPS Server running on port ${PORT}`);
+    });
+  } else {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }
 };
 
 app.use((err, req, res, next) => {

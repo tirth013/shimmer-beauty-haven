@@ -30,6 +30,10 @@ router.route("/verify-forgot-password-otp").post(verifyForgotPasswordOtp);
 router.route("/reset-password").post(resetPassword);
 router.route("/refresh-token").post(refreshToken);
 
+// Add a comment to clarify the refresh token endpoint for frontend integration
+// POST /api/user/refresh-token - Get a new access token using a valid refresh token
+router.route("/refresh-token").post(refreshToken);
+
 // Protected routes (require authentication)
 router.route("/logout").post(auth, logout);
 router.route("/details").get(auth, getUserDetails);
