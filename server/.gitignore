@@ -128,3 +128,6 @@ yarn-error.log
 # distribuzione
 dist
 dist-ssr
+
+ssl.cert
+ssl.key

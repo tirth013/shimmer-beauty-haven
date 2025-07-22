@@ -11,6 +11,8 @@ const generateRefreshToken = require("../utils/generateRefreshToken");
 const uploadImageCloudinary = require("../utils/uploadImageCloudinary");
 const generateOTP = require("../utils/generateOTP");
 const forgotPasswordTemplate = require("../utils/forgotPasswordTemplate");
+const validator = require("validator");
+const xss = require("xss-clean/lib/xss");
 
 /**
 Registers a new user, sends verification email, and returns user info.
@@ -24,7 +26,12 @@ const registerUser = asyncHandler(async (req, res) => {
         "Invalid or missing request body. Please send JSON with name, email, and password.",
     });
   }
-  const { name, email, password } = req.body || {};
+  let { name, email, password } = req.body || {};
+
+  // Sanitize input
+  name = validator.trim(validator.escape(name || ""));
+  email = validator.normalizeEmail(email || "");
+  password = validator.trim(password || "");
 
   // Validate input
   if (!name || !email || !password) {
@@ -32,6 +39,15 @@ const registerUser = asyncHandler(async (req, res) => {
       success: false,
       message: "Please fill in all fields (name, email, password).",
     });
+  }
+  if (!validator.isLength(name, { min: 2, max: 50 })) {
+    return res.status(400).json({ success: false, message: "Name must be 2-50 characters." });
+  }
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ success: false, message: "Invalid email address." });
+  }
+  if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
+    return res.status(400).json({ success: false, message: "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol." });
   }
 
   // Check if user already exists
@@ -96,12 +112,10 @@ const verifyEmail = asyncHandler(async (req, res) => {
       .status(400)
       .json({ success: false, message: "Missing request body." });
   }
-  const { code } = req.body || {};
+  let { code } = req.body || {};
+  code = validator.trim(validator.escape(code || ""));
   if (!code) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing verification code in request body.",
-    });
+    return res.status(400).json({ success: false, message: "Verification code is required." });
   }
   const user = await UserModel.findById(code);
   if (!user) {
@@ -130,16 +144,20 @@ Logs in a user and returns access and refresh tokens.
 */
 const login = asyncHandler(async (req, res) => {
   if (!req.body || typeof req.body !== "object") {
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing request body." });
-  }
-  const { email, password } = req.body || {};
-  if (!email || !password) {
     return res.status(400).json({
       success: false,
       message: "Please provide both email and password.",
     });
+  }
+  let { email, password } = req.body || {};
+  email = validator.normalizeEmail(email || "");
+  password = validator.trim(password || "");
+
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Please fill in all fields (email, password)." });
+  }
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ success: false, message: "Invalid email address." });
   }
   const user = await UserModel.findOne({ email });
   if (!user) {
@@ -442,11 +460,9 @@ const refreshToken = asyncHandler(async (req, res) => {
       token = parts[1];
     }
   }
-
+  token = validator.trim(token || "");
   if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Refresh token missing or invalid." });
+    return res.status(401).json({ success: false, message: "Refresh token missing or invalid." });
   }
 
   try {

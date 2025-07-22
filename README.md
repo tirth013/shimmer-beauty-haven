@@ -59,3 +59,17 @@ This is a full-stack eCommerce application built with the MERN stack (MongoDB, E
    cd ../client
    npm run dev
    ```
+
+## Security Features
+
+- **Rate Limiting**: Prevents brute force attacks by limiting requests per IP.
+- **Input Validation & Sanitization**: All user input is validated and sanitized to prevent injection and XSS attacks.
+- **JWT with Refresh Tokens**: Secure authentication with short-lived access tokens and refresh tokens. Use `/api/user/refresh-token` to obtain a new access token.
+- **HTTPS/SSL**: In production, the server supports HTTPS. Provide paths to your SSL key and certificate via environment variables:
+
+```
+SSL_KEY=/path/to/ssl.key
+SSL_CERT=/path/to/ssl.cert
+```
+
+Set `NODE_ENV=production` to enable HTTPS.
