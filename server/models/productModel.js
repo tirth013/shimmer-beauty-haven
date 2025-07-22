@@ -159,5 +159,7 @@ productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ brand: 1, isActive: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ ratings: 1 });
+// Compound index for search functionality
+productSchema.index({ name: 1, brand: 1, category: 1 });
 
 module.exports = mongoose.model("Product", productSchema);
