@@ -23,7 +23,6 @@ import ProductAdmin from "./pages/ProductAdmin";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Wishlist from "./pages/Wishlist";
-import AdminOverview from "./pages/AdminOverview";
 import OrderStatusAdmin from "./pages/OrderStatusAdmin";
 import DeliveryAreasAdmin from "./pages/DeliveryAreasAdmin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -51,7 +50,6 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/category/:slug" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
-              <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
               <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />

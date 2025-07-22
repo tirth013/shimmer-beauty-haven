@@ -61,23 +61,10 @@ const UserDropdown = () => {
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
-                {/* Link to the new Admin Overview page */}
                 <DropdownMenuItem asChild>
-                  <Link to="/admin/overview" className="flex items-center cursor-pointer">
+                  <Link to="/admin/dashboard" className="flex items-center cursor-pointer">
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Overview</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/category-admin" className="flex items-center cursor-pointer">
-                    <LayoutGrid className="mr-2 h-4 w-4" />
-                    <span>Manage Categories</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/product-admin" className="flex items-center cursor-pointer">
-                    <Package className="mr-2 h-4 w-4" />
-                    <span>Manage Products</span>
+                    <span>Admin Panel</span>
                   </Link>
                 </DropdownMenuItem>
               </>
