@@ -16,6 +16,7 @@ const session = require('express-session');
 const passport = require('passport');
 require('./config/passport-setup'); 
 const authRouter = require("./routes/authRoute");
+const compression = require("compression");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ app.use(
     crossOriginResourcePolicy: false,
   })
 );
+app.use(compression());
 
 // --- Add Passport Middleware ---
 app.use(session({
