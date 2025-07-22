@@ -52,6 +52,9 @@ const Login = () => {
       }
       localStorage.setItem('isLoggedIn', 'true');
       
+      // Dispatch login event for CartContext
+      window.dispatchEvent(new Event('loginStateChange'));
+      
       const localCart = JSON.parse(localStorage.getItem('shimmer_cart') || '[]');
       if (localCart.length > 0) {
         await Axios.post(SummaryApi.mergeCart.url, { localCart });
