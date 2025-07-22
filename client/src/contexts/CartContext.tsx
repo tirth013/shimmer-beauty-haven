@@ -37,25 +37,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Load cart from local storage on initial render (for guests)
-  useEffect(() => {
-    const savedCart = localStorage.getItem('shimmer_cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-  }, []);
-
-  // Save cart to local storage whenever it changes (for guests)
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      localStorage.setItem('shimmer_cart', JSON.stringify(cartItems));
-    }
-  }, [cartItems]);
-  
+  // Always clear cart on logout event
   const clearCart = useCallback(() => {
     setCartItems([]);
-    localStorage.removeItem('shimmer_cart');
   }, []);
 
   // Listen for logout event to clear cart
@@ -64,6 +48,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('logoutStateChange', clearCart);
   }, [clearCart]);
 
+  // Fetch user cart from backend
   const fetchUserCart = async () => {
     try {
       const response = await Axios.get(SummaryApi.getCart.url);
@@ -76,40 +61,59 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           image: item.productId.images[0]?.url || '',
         }));
         setCartItems(serverCart);
+      } else {
+        setCartItems([]);
       }
     } catch (error) {
       console.error("Failed to fetch user cart:", error);
+      setCartItems([]);
     }
   };
+
+  // Listen for login event to fetch user cart
+  useEffect(() => {
+    const handleLogin = async () => {
+      await fetchUserCart();
+    };
+    window.addEventListener('loginStateChange', handleLogin);
+    return () => window.removeEventListener('loginStateChange', handleLogin);
+  }, []);
 
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(i => i.id === item.id);
-      if (existingItem) {
-        toast({ title: "Added to cart", description: `${item.name} quantity updated.` });
-        return prevItems.map(i =>
-          i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity || 1) } : i
-        );
-      }
-      toast({ title: "Added to cart", description: `${item.name} has been added.` });
-      return [...prevItems, { ...item, quantity: item.quantity || 1 }];
-    });
-    if (!isCartOpen) {
+  const addToCart = async (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
+    try {
+      await Axios.post(SummaryApi.addToCart.url, {
+        productId: item.id,
+        quantity: item.quantity || 1,
+      });
+      toast({ title: "Added to cart", description: `${item.name} has been added or updated.` });
+      await fetchUserCart();
+      if (!isCartOpen) {
         toggleCart();
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add item to cart." });
     }
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-    toast({ title: "Item Removed", description: "The item has been removed from your cart." });
+  const removeFromCart = async (id: string) => {
+    try {
+      await Axios.delete(`${SummaryApi.deleteFromCart.url}/${id}`);
+      toast({ title: "Item Removed", description: "The item has been removed from your cart." });
+      await fetchUserCart();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to remove item from cart." });
+    }
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item => (item.id === id ? { ...item, quantity } : item))
-    );
+  const updateQuantity = async (id: string, quantity: number) => {
+    try {
+      await Axios.put(`${SummaryApi.updateCart.url}/${id}`, { quantity });
+      await fetchUserCart();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update item quantity." });
+    }
   };
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

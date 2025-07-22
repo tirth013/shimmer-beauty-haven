@@ -49,10 +49,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       setLoading(true);
-      
+
       const accessToken = localStorage.getItem('accesstoken');
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      
+
       if (!accessToken || !isLoggedIn) {
         setIsAuthenticated(false);
         setUser(null);
@@ -65,6 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (response.data.success) {
+        localStorage.removeItem('shimmer_cart');
         setIsAuthenticated(true);
         setUser(response.data.data);
         await fetchUserCart(); // Fetch cart if user is authenticated

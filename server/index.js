@@ -57,7 +57,7 @@ app.use(passport.session());
 // Rate limiting middleware (e.g., 100 requests per 15 minutes per IP)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: 1000,
   message: {
     success: false,
     message: "Too many requests from this IP, please try again later."
