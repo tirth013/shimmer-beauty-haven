@@ -26,6 +26,7 @@ import Wishlist from "./pages/Wishlist";
 import OrderStatusAdmin from "./pages/OrderStatusAdmin";
 import DeliveryAreasAdmin from "./pages/DeliveryAreasAdmin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOverview from "./pages/AdminOverview";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/category/:slug" element={<CategoryProductsPage />} />
               <Route path="/product/:slug" element={<ProductDetailPage />} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
               <Route path="/admin/category-admin" element={<AdminRoute><CategoryAdmin /></AdminRoute>} />
               <Route path="/admin/product-admin/upload" element={<AdminRoute><UploadProduct /></AdminRoute>} />
               <Route path="/admin/product-admin" element={<AdminRoute><ProductAdmin /></AdminRoute>} />
