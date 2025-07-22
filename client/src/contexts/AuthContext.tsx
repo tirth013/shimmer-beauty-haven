@@ -65,6 +65,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (response.data.success) {
+        // Clear guest cart on login
+        localStorage.removeItem('shimmer_cart');
         setIsAuthenticated(true);
         setUser(response.data.data);
         await fetchUserCart(); // Fetch cart if user is authenticated
