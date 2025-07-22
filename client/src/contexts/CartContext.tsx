@@ -37,29 +37,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Helper to check login state
-  const isLoggedIn = () => localStorage.getItem('isLoggedIn') === 'true';
-
-  // Load cart from local storage on initial render (for guests only)
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      const savedCart = localStorage.getItem('shimmer_cart');
-      if (savedCart) {
-        setCartItems(JSON.parse(savedCart));
-      }
-    }
-  }, []);
-
-  // Save cart to local storage whenever it changes (for guests only)
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      localStorage.setItem('shimmer_cart', JSON.stringify(cartItems));
-    }
-  }, [cartItems]);
-
+  // Always clear cart on logout event
   const clearCart = useCallback(() => {
     setCartItems([]);
-    localStorage.removeItem('shimmer_cart');
   }, []);
 
   // Listen for logout event to clear cart
@@ -67,24 +47,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     window.addEventListener('logoutStateChange', clearCart);
     return () => window.removeEventListener('logoutStateChange', clearCart);
   }, [clearCart]);
-
-  // Merge guest cart with user cart on login
-  const mergeGuestCartWithUserCart = useCallback(async () => {
-    const guestCart = localStorage.getItem('shimmer_cart');
-    if (guestCart) {
-      try {
-        const parsedCart = JSON.parse(guestCart);
-        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          await Axios.post(SummaryApi.mergeCart.url, { localCart: parsedCart });
-        }
-      } catch (err) {
-        console.error('Failed to merge guest cart:', err);
-      }
-      // Always clear guest cart after attempting merge
-      localStorage.removeItem('shimmer_cart');
-      setCartItems([]); // Clear context cart before fetching user cart
-    }
-  }, []);
 
   // Fetch user cart from backend
   const fetchUserCart = async () => {
@@ -99,23 +61,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           image: item.productId.images[0]?.url || '',
         }));
         setCartItems(serverCart);
+      } else {
+        setCartItems([]);
       }
     } catch (error) {
       console.error("Failed to fetch user cart:", error);
+      setCartItems([]);
     }
   };
 
-  // Listen for login event to merge guest cart and fetch user cart
+  // Listen for login event to fetch user cart
   useEffect(() => {
     const handleLogin = async () => {
-      if (isLoggedIn()) {
-        await mergeGuestCartWithUserCart();
-        await fetchUserCart();
-      }
+      await fetchUserCart();
     };
     window.addEventListener('loginStateChange', handleLogin);
     return () => window.removeEventListener('loginStateChange', handleLogin);
-  }, [mergeGuestCartWithUserCart]);
+  }, []);
 
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
