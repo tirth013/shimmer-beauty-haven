@@ -3,6 +3,7 @@ const OrderModel = require("../models/orderModel");
 const UserModel = require("../models/userModel");
 const CategoryModel = require("../models/categoryModel");
 const ProductModel = require("../models/productModel");
+const AddressModel = require("../models/addressModel");
 
 /**
  * Get Admin Overview Stats
@@ -47,6 +48,48 @@ const getOverviewStats = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Get Orders by Status
+ * @route GET /api/admin/orders/:status
+ */
+const getOrdersByStatus = asyncHandler(async (req, res) => {
+  const { status } = req.params;
+  const validStatuses = ['pending', 'accepted', 'rejected', 'completed'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: 'Invalid order status' });
+  }
+  const orders = await OrderModel.find({ status }).populate('userId', 'name email').populate('productId');
+  res.json({ success: true, data: orders });
+});
+
+/**
+ * Get Delivery Areas
+ * @route GET /api/admin/delivery-areas
+ */
+const getDeliveryAreas = asyncHandler(async (req, res) => {
+  // Group by city, state, pincode for unique delivery areas
+  const areas = await AddressModel.aggregate([
+    {
+      $group: {
+        _id: { city: "$city", state: "$state", pincode: "$pincode" },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        city: "$_id.city",
+        state: "$_id.state",
+        pincode: "$_id.pincode",
+        count: 1
+      }
+    }
+  ]);
+  res.json({ success: true, data: areas });
+});
+
 module.exports = {
   getOverviewStats,
+  getOrdersByStatus,
+  getDeliveryAreas,
 };
