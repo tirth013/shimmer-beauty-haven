@@ -81,32 +81,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(i => i.id === item.id);
-      if (existingItem) {
-        toast({ title: "Added to cart", description: `${item.name} quantity updated.` });
-        return prevItems.map(i =>
-          i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity || 1) } : i
-        );
-      }
-      toast({ title: "Added to cart", description: `${item.name} has been added.` });
-      return [...prevItems, { ...item, quantity: item.quantity || 1 }];
-    });
-    if (!isCartOpen) {
+  const addToCart = async (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
+    try {
+      await Axios.post(SummaryApi.addToCart.url, {
+        productId: item.id,
+        quantity: item.quantity || 1,
+      });
+      toast({ title: "Added to cart", description: `${item.name} has been added or updated.` });
+      await fetchUserCart();
+      if (!isCartOpen) {
         toggleCart();
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add item to cart." });
     }
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-    toast({ title: "Item Removed", description: "The item has been removed from your cart." });
+  const removeFromCart = async (id: string) => {
+    try {
+      await Axios.delete(`${SummaryApi.deleteFromCart.url}/${id}`);
+      toast({ title: "Item Removed", description: "The item has been removed from your cart." });
+      await fetchUserCart();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to remove item from cart." });
+    }
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item => (item.id === id ? { ...item, quantity } : item))
-    );
+  const updateQuantity = async (id: string, quantity: number) => {
+    try {
+      await Axios.put(`${SummaryApi.updateCart.url}/${id}`, { quantity });
+      await fetchUserCart();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update item quantity." });
+    }
   };
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
