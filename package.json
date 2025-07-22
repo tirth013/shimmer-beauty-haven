@@ -1,5 +1,25 @@
 {
+  "name": "dev-threads",
+  "version": "1.0.0",
+  "description": "This is a full-stack eCommerce application built with the MERN stack (MongoDB, Express, React, Node.js). It includes a variety of features for both customers and administrators.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "nodemon server/index.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm install --prefix client && npm run build --prefix client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "lucide-react": "^0.525.0"
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }

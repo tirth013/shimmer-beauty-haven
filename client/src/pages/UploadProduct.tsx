@@ -288,7 +288,7 @@ const UploadProduct = () => {
           title: "Success",
           description: isEditing ? "Product updated successfully" : "Product created successfully",
         });
-        navigate('/admin/product-admin');
+        navigate('/admin/product');
       }
     } catch (error: any) {
       console.error('Error saving product:', error);
@@ -303,349 +303,360 @@ const UploadProduct = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Link to="/admin/product-admin">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            {isEditing ? 'Edit Product' : 'Add New Product'}
-          </h1>
+    <>
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {isEditing ? "Edit Product" : "Add New Product"}
+          </h2>
           <p className="text-muted-foreground">
-            {isEditing ? 'Update product information' : 'Create a new product for your store'}
+            {isEditing
+              ? "Update the product details below."
+              : "Fill in the form to add a new product."}
           </p>
         </div>
+        <div className="flex items-center space-x-2">
+          <Link to="/admin/product">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </Link>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Basic Information
-            </CardTitle>
-            <CardDescription>
-              Enter the basic details of your product
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Product Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Enter product name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="brand">Brand *</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                  placeholder="Enter brand name"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="shortDescription">Short Description</Label>
-              <Input
-                id="shortDescription"
-                value={formData.shortDescription}
-                onChange={(e) => setFormData({...formData, shortDescription: e.target.value})}
-                placeholder="Brief description for product listings"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Detailed product description"
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category._id} value={category._id}>
-                        {category.parentCategory ? `${category.parentCategory.name} > ${category.name}` : category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sku">SKU *</Label>
-                <Input
-                  id="sku"
-                  value={formData.sku}
-                  onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                  placeholder="Enter SKU"
-                  required
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pricing Card - UPDATED */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span className="font-bold text-xl">₹</span>
-              Pricing (INR)
-            </CardTitle>
-            <CardDescription>
-              Set the pricing for your product in Indian Rupees (₹)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Price (₹) *</Label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+      <div className="mt-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Basic Information
+              </CardTitle>
+              <CardDescription>
+                Enter the basic details of your product
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Product Name *</Label>
                   <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    placeholder="1,499.00"
-                    className="pl-7"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="Enter product name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="brand">Brand *</Label>
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                    placeholder="Enter brand name"
                     required
                   />
                 </div>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="originalPrice">Original Price (₹) (Optional)</Label>
-                <div className="relative">
-                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
-                   <Input
-                    id="originalPrice"
-                    type="number"
-                    step="0.01"
-                    value={formData.originalPrice}
-                    onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
-                    placeholder="1,999.00"
-                    className="pl-7"
+                <Label htmlFor="shortDescription">Short Description</Label>
+                <Input
+                  id="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={(e) => setFormData({...formData, shortDescription: e.target.value})}
+                  placeholder="Brief description for product listings"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description *</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Detailed product description"
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category *</Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category._id} value={category._id}>
+                          {category.parentCategory ? `${category.parentCategory.name} > ${category.name}` : category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU *</Label>
+                  <Input
+                    id="sku"
+                    value={formData.sku}
+                    onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                    placeholder="Enter SKU"
+                    required
                   />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Images */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5" />
-              Product Images
-            </CardTitle>
-            <CardDescription>
-              Upload product images (max 10MB each)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {imageFiles.map((image) => (
-                <div key={image.id} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden border">
-                    <img 
-                      src={image.url} 
-                      alt="Product preview" 
-                      className="w-full h-full object-cover"
+          {/* Pricing Card - UPDATED */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="font-bold text-xl">₹</span>
+                Pricing (INR)
+              </CardTitle>
+              <CardDescription>
+                Set the pricing for your product in Indian Rupees (₹)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (₹) *</Label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      placeholder="1,499.00"
+                      className="pl-7"
+                      required
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="originalPrice">Original Price (₹) (Optional)</Label>
+                  <div className="relative">
+                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                     <Input
+                      id="originalPrice"
+                      type="number"
+                      step="0.01"
+                      value={formData.originalPrice}
+                      onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
+                      placeholder="1,999.00"
+                      className="pl-7"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Images */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Product Images
+              </CardTitle>
+              <CardDescription>
+                Upload product images (max 10MB each)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {imageFiles.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden border">
+                      <img 
+                        src={image.url} 
+                        alt="Product preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(image.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                
+                <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
+                  <Label htmlFor="images" className="cursor-pointer flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground">
+                    <Upload className="h-8 w-8" />
+                    <span className="text-sm">Upload Images</span>
+                  </Label>
+                  <Input
+                    id="images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Specifications */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Specifications</CardTitle>
+              <CardDescription>
+                Add product specifications and features
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {specifications.map((spec, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    placeholder="Specification name"
+                    value={spec.key}
+                    onChange={(e) => updateSpecification(index, 'key', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Specification value"
+                    value={spec.value}
+                    onChange={(e) => updateSpecification(index, 'value', e.target.value)}
+                  />
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="outline"
                     size="icon"
-                    className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeImage(image.id)}
+                    onClick={() => removeSpecification(index)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
-              
-              <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
-                <Label htmlFor="images" className="cursor-pointer flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground">
-                  <Upload className="h-8 w-8" />
-                  <span className="text-sm">Upload Images</span>
-                </Label>
-                <Input
-                  id="images"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <Button type="button" variant="outline" onClick={addSpecification}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Specification
+              </Button>
+            </CardContent>
+          </Card>
 
-        {/* Specifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Specifications</CardTitle>
-            <CardDescription>
-              Add product specifications and features
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {specifications.map((spec, index) => (
-              <div key={index} className="flex gap-2">
+          {/* Tags */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Tags
+              </CardTitle>
+              <CardDescription>
+                Add tags to help customers find your product
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                    {tag}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => removeTag(tag)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex gap-2">
                 <Input
-                  placeholder="Specification name"
-                  value={spec.key}
-                  onChange={(e) => updateSpecification(index, 'key', e.target.value)}
+                  placeholder="Add a tag"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                 />
-                <Input
-                  placeholder="Specification value"
-                  value={spec.value}
-                  onChange={(e) => updateSpecification(index, 'value', e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => removeSpecification(index)}
-                >
-                  <X className="h-4 w-4" />
+                <Button type="button" variant="outline" onClick={addTag}>
+                  Add
                 </Button>
               </div>
-            ))}
-            <Button type="button" variant="outline" onClick={addSpecification}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Specification
-            </Button>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Tags */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
-              Tags
-            </CardTitle>
-            <CardDescription>
-              Add tags to help customers find your product
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 hover:bg-destructive hover:text-destructive-foreground"
-                    onClick={() => removeTag(tag)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add a tag"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              />
-              <Button type="button" variant="outline" onClick={addTag}>
-                Add
+          {/* Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Settings</CardTitle>
+              <CardDescription>
+                Configure product visibility and features
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isActive">Active</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Make this product visible to customers
+                  </p>
+                </div>
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isFeatured">Featured</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show this product in featured sections
+                  </p>
+                </div>
+                <Switch
+                  id="isFeatured"
+                  checked={formData.isFeatured}
+                  onCheckedChange={(checked) => setFormData({...formData, isFeatured: checked})}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <div className="flex justify-end gap-4">
+            <Link to="/admin/product">
+              <Button type="button" variant="outline">
+                Cancel
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Settings</CardTitle>
-            <CardDescription>
-              Configure product visibility and features
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="isActive">Active</Label>
-                <p className="text-sm text-muted-foreground">
-                  Make this product visible to customers
-                </p>
-              </div>
-              <Switch
-                id="isActive"
-                checked={formData.isActive}
-                onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
-              />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="isFeatured">Featured</Label>
-                <p className="text-sm text-muted-foreground">
-                  Show this product in featured sections
-                </p>
-              </div>
-              <Switch
-                id="isFeatured"
-                checked={formData.isFeatured}
-                onCheckedChange={(checked) => setFormData({...formData, isFeatured: checked})}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Submit Button */}
-        <div className="flex justify-end gap-4">
-          <Link to="/admin/product-admin">
-            <Button type="button" variant="outline">
-              Cancel
+            </Link>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-gradient-luxury"
+            >
+              {loading ? (
+                "Saving..."
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEditing ? "Update Product" : "Create Product"}
+                </>
+              )}
             </Button>
-          </Link >
-          <Button type="submit" disabled={loading} className="bg-gradient-luxury">
-            {loading ? 'Saving...' : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {isEditing ? 'Update Product' : 'Create Product'}
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-    </div>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 
