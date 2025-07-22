@@ -101,6 +101,7 @@ const getAdminDashboardStats = asyncHandler(async (req, res) => {
     success: true,
     data: {
       totalBrands,
+      brands,
       totalSales,
       totalCustomers,
     },

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Axios from "@/utils/Axios";
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({ totalBrands: 0, totalSales: 0, totalCustomers: 0 });
+  const [stats, setStats] = useState({ totalBrands: 0, brands: [], totalSales: 0, totalCustomers: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +29,16 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 bg-white rounded shadow">
             <h2 className="text-lg font-semibold">Total Brands</h2>
-            <p className="text-2xl">{stats.totalBrands}</p>
+            <p className="text-2xl mb-2">{stats.totalBrands}</p>
+            <ul className="list-disc list-inside text-sm text-gray-700">
+              {stats.brands && stats.brands.length > 0 ? (
+                stats.brands.map((brand, idx) => (
+                  <li key={idx}>{brand}</li>
+                ))
+              ) : (
+                <li>No brands found</li>
+              )}
+            </ul>
           </div>
           <div className="p-6 bg-white rounded shadow">
             <h2 className="text-lg font-semibold">Total Sales</h2>
