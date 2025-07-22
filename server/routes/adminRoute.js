@@ -1,5 +1,5 @@
 const express = require("express");
-const { getOverviewStats, getOrdersByStatus, getDeliveryAreas } = require("../controller/adminController");
+const { getOverviewStats, getOrdersByStatus, getDeliveryAreas, getAdminDashboardStats } = require("../controller/adminController");
 const auth = require("../middleware/auth");
 const adminOnly = require("../middleware/adminOnly");
 
@@ -9,5 +9,6 @@ const router = express.Router();
 router.route("/overview").get(auth, adminOnly, getOverviewStats);
 router.route("/orders/:status").get(auth, adminOnly, getOrdersByStatus);
 router.route("/delivery-areas").get(auth, adminOnly, getDeliveryAreas);
+router.route("/dashboard-stats").get(auth, adminOnly, getAdminDashboardStats);
 
 module.exports = router;

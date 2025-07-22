@@ -88,8 +88,28 @@ const getDeliveryAreas = asyncHandler(async (req, res) => {
   res.json({ success: true, data: areas });
 });
 
+/**
+ * Get Admin Dashboard Stats
+ * @route GET /api/admin/dashboard-stats
+ */
+const getAdminDashboardStats = asyncHandler(async (req, res) => {
+  const brands = await ProductModel.distinct("brand");
+  const totalBrands = brands.length;
+  const totalSales = await OrderModel.countDocuments({ status: "completed" });
+  const totalCustomers = await UserModel.countDocuments({ role: "user" });
+  res.json({
+    success: true,
+    data: {
+      totalBrands,
+      totalSales,
+      totalCustomers,
+    },
+  });
+});
+
 module.exports = {
   getOverviewStats,
   getOrdersByStatus,
   getDeliveryAreas,
+  getAdminDashboardStats,
 };
