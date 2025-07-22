@@ -169,7 +169,7 @@ const ProductDetailPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
                     {/* Image Gallery */}
-                    <div className="sticky md:static top-24">
+                    <div className="static md:sticky md:top-24">
                         <div className="w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4 bg-white">
                             <img src={selectedImage} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
                         </div>
