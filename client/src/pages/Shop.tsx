@@ -24,7 +24,10 @@ interface Product {
 }
 
 interface Category {
-  _id: string; name: string; productsCount: number;
+  _id: string;
+  name: string;
+  slug: string;
+  productsCount?: number;
 }
 
 const Shop = () => {
