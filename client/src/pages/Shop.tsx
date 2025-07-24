@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ interface Product {
 }
 
 interface Category {
-  _id: string; name: string; productsCount: number;
+  _id: string; name: string; productsCount: number; slug: string;
 }
 
 const Shop = () => {
@@ -32,87 +32,110 @@ const Shop = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [totalProducts, setTotalProducts] = useState(0);
   
   // Filtering and Sorting State
   const [activeCategory, setActiveCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [rating, setRating] = useState(0);
-  const [sortBy, setSortBy] = useState('featured-desc');
+  const [sortBy, setSortBy] = useState('createdAt-desc');
+  const [maxPrice, setMaxPrice] = useState(1000);
 
   const debouncedPriceRange = useDebounce(priceRange, 500);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  const perPage = 9;
+
   // Fetching Logic
-  const fetchProducts = useCallback(async (page: number, newFilters = false) => {
-    if (page === 1) setLoading(true); else setLoadingMore(true);
+  const fetchAllCategoryProducts = useCallback(async () => {
+    setLoading(true);
     setError(null);
-
     try {
-      const [sortField, sortOrder] = sortBy.split('-');
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12',
-        sortBy: sortField,
-        sortOrder: sortOrder || 'desc',
-        minPrice: debouncedPriceRange[0].toString(),
-        maxPrice: debouncedPriceRange[1].toString(),
-      });
-      if (activeCategory !== 'all') params.append('category', activeCategory);
-      if (rating > 0) params.append('minRating', rating.toString());
-
-      const response = await Axios.get(`${SummaryApi.getAllProducts.url}?${params.toString()}`);
-
-      if (response.data.success) {
-        const { products: newProducts, pagination } = response.data.data;
-        setProducts(prev => newFilters ? newProducts : [...prev, ...newProducts]);
-        setTotalProducts(pagination.totalProducts);
-        setHasMore(pagination.hasNext);
-        setCurrentPage(page);
-      } else {
-        throw new Error("Failed to fetch products");
+      // Fetch all categories (no parent filter to get all, including subcategories)
+      const categoriesRes = await Axios.get(SummaryApi.getAllCategories.url);
+      if (!categoriesRes.data.success || !Array.isArray(categoriesRes.data.data)) {
+        throw new Error('Failed to fetch categories');
       }
+      setCategories(categoriesRes.data.data);
+
+      // Fetch all products in one call (set limit=0 to get all)
+      const productsRes = await Axios.get(`${SummaryApi.getAllProducts.url}?limit=0`);
+      if (!productsRes.data.success || !Array.isArray(productsRes.data.data.products)) {
+        throw new Error('Failed to fetch products');
+      }
+      setProducts(productsRes.data.data.products);
     } catch (err) {
-      setError("Could not load products. Please try again later.");
+      console.error('Error fetching data:', err);
+      setError('Could not load products. Please try again later.');
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
-  }, [activeCategory, debouncedPriceRange, rating, sortBy]);
+  }, []);
 
-  // Effects for data fetching
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await Axios.get(SummaryApi.getAllCategories.url);
-        if (response.data.success) {
-          const allProductsCategory = { _id: 'all', name: 'All Products', productsCount: totalProducts };
-          setCategories([allProductsCategory, ...response.data.data]);
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
+    fetchAllCategoryProducts();
+  }, [fetchAllCategoryProducts]);
+
+  // Dynamically set maxPrice after fetching products
+  useEffect(() => {
+    if (products.length > 0) {
+      const mp = Math.ceil(Math.max(...products.map(p => p.price)) / 10) * 10 || 1000;
+      setMaxPrice(mp);
+      setPriceRange([0, mp]);
+    }
+  }, [products]);
+
+  // Compute filtered and sorted products
+  const computedProducts = useMemo(() => {
+    // Filter
+    const filtered = products.filter(p => {
+      if (activeCategory !== 'all' && p.category._id !== activeCategory) return false;
+      if (p.price < debouncedPriceRange[0] || p.price > debouncedPriceRange[1]) return false;
+      if (rating > 0 && p.ratings.average < rating) return false;
+      return true;
+    });
+
+    // Sort
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'createdAt-desc':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'rating-desc':
+          return b.ratings.average - a.ratings.average;
+        case 'featured-desc':
+          // Assuming featured sorts by number of reviews descending, with average as tiebreaker
+          return b.ratings.numOfReviews - a.ratings.numOfReviews || b.ratings.average - a.ratings.average;
+        default:
+          return 0;
       }
-    };
-    fetchCategories();
-  }, [totalProducts]);
+    });
+  }, [products, activeCategory, debouncedPriceRange, rating, sortBy]);
 
-  useEffect(() => {
-    fetchProducts(1, true);
-  }, [fetchProducts]);
+  // Paginate
+  const displayedProducts = computedProducts.slice(0, currentPage * perPage);
+  const totalFiltered = computedProducts.length;
+  const hasMore = currentPage * perPage < totalFiltered;
 
   const handleLoadMore = () => {
     if (hasMore && !loadingMore) {
-      fetchProducts(currentPage + 1);
+      setLoadingMore(true);
+      // Simulate a short delay for UX, even though data is local
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setLoadingMore(false);
+      }, 300);
     }
   };
 
   const resetFilters = () => {
     setActiveCategory('all');
-    setPriceRange([0, 500]);
+    setPriceRange([0, maxPrice]);
     setRating(0);
     setSortBy('featured-desc');
   };
@@ -134,7 +157,17 @@ const Shop = () => {
       <div>
         <h4 className="font-medium mb-3">Categories</h4>
         <div className="space-y-1 max-h-60 overflow-y-auto pr-2">
-          {categories.length > 1 ? (
+          <button
+            onClick={() => setActiveCategory('all')}
+            className={`w-full text-left p-2 rounded-md transition-colors text-sm ${
+              activeCategory === 'all'
+                ? 'bg-primary/10 text-primary font-semibold' 
+                : 'hover:bg-muted/50'
+            }`}
+          >
+            All Categories
+          </button>
+          {categories.length > 0 ? (
             categories.map((category) => (
               <button
                 key={category._id}
@@ -161,7 +194,7 @@ const Shop = () => {
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          max={1000}
+          max={maxPrice}
           step={10}
           className="w-full"
         />
@@ -176,6 +209,12 @@ const Shop = () => {
       <div>
         <h4 className="font-medium mb-4">Rating</h4>
         <div className="flex items-center space-x-1">
+          <button 
+            onClick={() => setRating(0)}
+            className={`flex items-center p-2 rounded-md transition-colors border ${rating === 0 ? 'bg-amber-100 border-amber-300' : 'hover:bg-muted/50'}`}
+          >
+            <span className="text-sm">Any</span>
+          </button>
           {[5, 4, 3, 2, 1].map(star => (
             <button key={star} onClick={() => setRating(star)}
               className={`flex items-center p-2 rounded-md transition-colors border ${rating === star ? 'bg-amber-100 border-amber-300' : 'hover:bg-muted/50'}`}
@@ -220,10 +259,10 @@ const Shop = () => {
               <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <div>
                   <h2 className="text-3xl font-playfair font-bold">
-                    {categories.find(c => c._id === activeCategory)?.name || 'Products'}
+                    {activeCategory === 'all' ? 'Products' : categories.find(c => c._id === activeCategory)?.name || 'Products'}
                   </h2>
                   <p className="text-muted-foreground mt-1">
-                    Showing {products.length} of {totalProducts} products
+                    Showing {displayedProducts.length} of {totalFiltered} products
                   </p>
                 </div>
                 
@@ -268,14 +307,14 @@ const Shop = () => {
                 </div>
               ) : error ? (
                 <div className="text-center text-destructive py-10">{error}</div>
-              ) : products.length === 0 ? (
+              ) : computedProducts.length === 0 ? (
                 <div className="text-center text-muted-foreground py-20 rounded-lg bg-muted/50">
                     <h3 className="text-2xl font-semibold mb-2">No Products Found</h3>
                     <p>Try adjusting your filters to find what you're looking for.</p>
                 </div>
               ) : (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-                  {products.map((product) => {
+                  {displayedProducts.map((product) => {
                     const thirtyDaysAgo = new Date();
                     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                     const isNew = new Date(product.createdAt) > thirtyDaysAgo;

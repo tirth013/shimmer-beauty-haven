@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Search, Menu, X, Heart, User } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SearchDropdown from './ui/SearchDropdown';
 import { useCart } from "@/contexts/CartContext";
-import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from "@/components/ui/skeleton";
 import Axios from '@/utils/Axios';
 import SummaryApi from "@/common/summaryApi";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import UserDropdown from "@/components/UserDropdown"; // ✅ Import the fixed dropdown
 
 interface Category {
   _id: string;
@@ -27,14 +26,12 @@ const Navigation = () => {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toggleCart, cartCount } = useCart();
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
         const response = await Axios.get(`${SummaryApi.getAllCategories.url}?parent=main`);
-
         if (response.data.success && Array.isArray(response.data.data)) {
           const dynamicCategories: NavItem[] = response.data.data.map((cat: Category) => ({
             name: cat.name,
@@ -70,7 +67,7 @@ const Navigation = () => {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b relative">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="font-playfair text-2xl font-bold text-primary">
@@ -117,29 +114,7 @@ const Navigation = () => {
               <SearchDropdown open={searchOpen} onClose={() => setSearchOpen(false)} />
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Open login menu"
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {/* Add your login dropdown content here */}
-                {user ? (
-                  <Link to="/profile" className="block px-4 py-2 hover:bg-accent rounded">
-                    Profile
-                  </Link>
-                ) : (
-                  <Link to="/login" className="block px-4 py-2 hover:bg-accent rounded">
-                    Login
-                  </Link>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserDropdown />
 
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" aria-label="Wishlist">
