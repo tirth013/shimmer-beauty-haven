@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,SheetDescription } from "@/components/ui/sheet";
 import { Separator } from './ui/separator';
 import { formatRupees } from '@/lib/currency';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -27,6 +27,7 @@ const CartSidePanel = () => {
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="px-6">
           <SheetTitle>Cart ({cartCount})</SheetTitle>
+          <SheetDescription>Review your cart items before checkout.</SheetDescription>
         </SheetHeader>
         <Separator />
         

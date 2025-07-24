@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Search, Menu, X, Heart } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, Heart, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import UserDropdown from "@/components/UserDropdown";
 import SearchDropdown from './ui/SearchDropdown';
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from '@/contexts/AuthContext';
 import Axios from '@/utils/Axios';
 import SummaryApi from "@/common/summaryApi";
-import { Skeleton } from "@/components/ui/skeleton"; 
+import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Category {
   _id: string;
@@ -17,8 +17,8 @@ interface Category {
   slug: string;
 }
 interface NavItem {
-    name: string;
-    href: string;
+  name: string;
+  href: string;
 }
 
 const Navigation = () => {
@@ -34,13 +34,13 @@ const Navigation = () => {
       setIsLoading(true);
       try {
         const response = await Axios.get(`${SummaryApi.getAllCategories.url}?parent=main`);
-        
+
         if (response.data.success && Array.isArray(response.data.data)) {
           const dynamicCategories: NavItem[] = response.data.data.map((cat: Category) => ({
             name: cat.name,
             href: `/category/${cat.slug}`,
           }));
-          
+
           setNavItems([
             { name: "Home", href: "/" },
             { name: "Shop", href: "/shop" },
@@ -48,19 +48,18 @@ const Navigation = () => {
             { name: "About Us", href: "/about" },
           ]);
         } else {
-            setNavItems([
-                { name: "Home", href: "/" },
-                { name: "Shop", href: "/shop" },
-                { name: "About Us", href: "/about" },
-            ]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        // On error, fall back to the static items to prevent a crash
-        setNavItems([
+          setNavItems([
             { name: "Home", href: "/" },
             { name: "Shop", href: "/shop" },
             { name: "About Us", href: "/about" },
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        setNavItems([
+          { name: "Home", href: "/" },
+          { name: "Shop", href: "/shop" },
+          { name: "About Us", href: "/about" },
         ]);
       } finally {
         setIsLoading(false);
@@ -80,45 +79,81 @@ const Navigation = () => {
 
           <div className="hidden md:flex items-center space-x-8">
             {isLoading ? (
-                // Show skeleton loaders while categories are being fetched
-                <>
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-24" />
-                </>
+              <>
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+              </>
             ) : (
-                navItems.map((item) => (
-                  <NavLink
-                    key={item.href} // Use href for a more stable key
-                    to={item.href}
-                    className={({ isActive }) =>
-                      cn(
-                        "text-foreground hover:text-primary transition-colors font-medium",
-                        isActive ? "text-primary" : ""
-                      )
-                    }
-                  >
-                    {item.name}
-                  </NavLink>
-                ))
+              navItems.map((item) => (
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  className={({ isActive }) =>
+                    cn(
+                      "text-foreground hover:text-primary transition-colors font-medium",
+                      isActive ? "text-primary" : ""
+                    )
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))
             )}
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Button variant="ghost" size="icon" className="hidden md:flex" onClick={() => setSearchOpen(true)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden md:flex"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search"
+              >
                 <Search className="h-5 w-5" />
               </Button>
               <SearchDropdown open={searchOpen} onClose={() => setSearchOpen(false)} />
             </div>
-            <UserDropdown />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Open login menu"
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {/* Add your login dropdown content here */}
+                {user ? (
+                  <Link to="/profile" className="block px-4 py-2 hover:bg-accent rounded">
+                    Profile
+                  </Link>
+                ) : (
+                  <Link to="/login" className="block px-4 py-2 hover:bg-accent rounded">
+                    Login
+                  </Link>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Link to="/wishlist">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Wishlist">
                 <Heart className="h-5 w-5" />
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={toggleCart}
+              aria-label="Cart"
+            >
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -132,6 +167,7 @@ const Navigation = () => {
               size="icon"
               className="md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -154,7 +190,12 @@ const Navigation = () => {
               </Link>
             ))}
             <div className="pt-4 border-t">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => { setSearchOpen(true); setIsMenuOpen(false); }}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => { setSearchOpen(true); setIsMenuOpen(false); }}
+                aria-label="Search"
+              >
                 <Search className="h-5 w-5 mr-2" />
                 Search
               </Button>

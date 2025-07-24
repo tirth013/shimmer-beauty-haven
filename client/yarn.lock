@@ -3197,7 +3197,7 @@ react-resizable-panels@^2.1.3:
   resolved "https://registry.yarnpkg.com/react-resizable-panels/-/react-resizable-panels-2.1.9.tgz#874847710f4f122df749b5f08ebe9c72a1e338ca"
   integrity sha512-z77+X08YDIrgAes4jl8xhnUu1LNIRp4+E7cv4xHmLOxxUPO/ML7PSrE813b90vj7xvQ1lcf7g2uA9GeMZonjhQ==
 
-react-router-dom@^6.26.2:
+react-router-dom@6:
   version "6.30.1"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-6.30.1.tgz#da2580c272ddb61325e435478566be9563a4a237"
   integrity sha512-llKsgOkZdbPU1Eg3zK8lCn+sjD9wMRZZPuzmdWWX5SUs8OFkN5HnFVC0u5KMeMaC9aoancFI/KoLuKPqN+hxHw==

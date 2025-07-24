@@ -42,7 +42,7 @@ const App = () => (
         <AuthProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_relativeSplatPath: true }}>
             <CartSidePanel />
             <Suspense fallback={<div>Loading...</div>}>
               <Routes>
@@ -63,7 +63,6 @@ const App = () => (
                 <Route path="/shipping-info" element={<ShippingInfo />} />
                 <Route path="/returns" element={<Returns />} />
                 <Route path="/size-guide" element={<SizeGuide />} />
-
                 <Route
                   path="/admin"
                   element={
@@ -84,7 +83,6 @@ const App = () => (
           </BrowserRouter>
         </AuthProvider>
       </CartProvider>
-      {/* --- END CORRECTION --- */}
     </TooltipProvider>
   </QueryClientProvider>
 );

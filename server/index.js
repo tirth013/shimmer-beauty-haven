@@ -22,9 +22,12 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const fs = require("fs");
 const https = require("https");
+const nocache = require("nocache");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === "production";
+
 
 // Middleware (for JSON parsing)
 app.use(express.json({ limit: "10mb" }));
@@ -36,19 +39,26 @@ app.use(
 );
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
+app.use(nocache());
 app.use(morgan("combined"));
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
   })
 );
+
 app.use(compression());
 
 // --- Add Passport Middleware ---
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  cookie: {
+    secure: isProduction, 
+    httpOnly: true,        
+    sameSite: isProduction ? "none" : "lax",  
+  },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
