@@ -28,6 +28,7 @@ interface Category {
 }
 
 const Shop = () => {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ const Shop = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   
   // Filtering and Sorting State
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | string>('all');
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [rating, setRating] = useState(0);
   const [sortBy, setSortBy] = useState('createdAt-desc');
@@ -67,7 +68,7 @@ const Shop = () => {
           allProducts.push(...productsRes.data.data.products);
         }
       }
-      setProducts(allProducts);
+      setAllProducts(allProducts);
       setTotalProducts(allProducts.length);
       setHasMore(false); // No pagination for now
     } catch (err) {
@@ -76,6 +77,30 @@ const Shop = () => {
       setLoading(false);
     }
   }, []);
+
+  // Filtering and sorting logic
+  useEffect(() => {
+    let filtered = [...allProducts];
+    // Category filter
+    if (activeCategory !== 'all') {
+      filtered = filtered.filter(p => p.category && (p.category._id === activeCategory || p.category.slug === activeCategory));
+    }
+    // Price filter
+    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    // Rating filter
+    if (rating > 0) {
+      filtered = filtered.filter(p => p.ratings && p.ratings.average >= rating);
+    }
+    // Sorting
+    filtered.sort((a, b) => {
+      if (sortBy === 'createdAt-desc') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortBy === 'price-asc') return a.price - b.price;
+      if (sortBy === 'price-desc') return b.price - a.price;
+      if (sortBy === 'rating-desc') return (b.ratings?.average || 0) - (a.ratings?.average || 0);
+      return 0;
+    });
+    setProducts(filtered);
+  }, [allProducts, activeCategory, priceRange, rating, sortBy]);
 
   useEffect(() => {
     fetchAllCategoryProducts();
@@ -111,23 +136,30 @@ const Shop = () => {
       <div>
         <h4 className="font-medium mb-3">Categories</h4>
         <div className="space-y-1 max-h-60 overflow-y-auto pr-2">
-          {categories.length > 1 ? (
-            categories.map((category) => (
-              <button
-                key={category._id}
-                onClick={() => setActiveCategory(category._id)}
-                className={`w-full text-left p-2 rounded-md transition-colors text-sm ${
-                  activeCategory === category._id
-                    ? 'bg-primary/10 text-primary font-semibold' 
-                    : 'hover:bg-muted/50'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))
-          ) : (
-            Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-full mt-1" />)
-          )}
+          <button
+            key="all"
+            onClick={() => setActiveCategory('all')}
+            className={`w-full text-left p-2 rounded-md transition-colors text-sm ${
+              activeCategory === 'all'
+                ? 'bg-primary/10 text-primary font-semibold'
+                : 'hover:bg-muted/50'
+            }`}
+          >
+            All Products
+          </button>
+          {categories.length > 0 && categories.map((category) => (
+            <button
+              key={category._id}
+              onClick={() => setActiveCategory(category._id)}
+              className={`w-full text-left p-2 rounded-md transition-colors text-sm ${
+                activeCategory === category._id
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'hover:bg-muted/50'
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
       </div>
 
