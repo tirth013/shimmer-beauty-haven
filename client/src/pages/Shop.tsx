@@ -45,6 +45,7 @@ const Shop = () => {
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 12;
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -100,7 +101,12 @@ const Shop = () => {
       return 0;
     });
     setProducts(filtered);
+    setCurrentPage(1); // Reset to first page on filter/sort change
   }, [allProducts, activeCategory, priceRange, rating, sortBy]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(products.length / productsPerPage);
+  const paginatedProducts = products.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
 
   useEffect(() => {
     fetchAllCategoryProducts();
@@ -284,12 +290,34 @@ const Shop = () => {
                 </div>
               ) : (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-                  {products.map((product) => {
+                  {paginatedProducts.map((product) => {
                     const thirtyDaysAgo = new Date();
                     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                     const isNew = new Date(product.createdAt) > thirtyDaysAgo;
                     return <ProductCard key={product._id} id={product._id} slug={product.slug} name={product.name} price={product.price} originalPrice={product.originalPrice} image={product.images[0]?.url || ''} rating={product.ratings.average} reviews={product.ratings.numOfReviews} category={product.category.name} isSale={!!(product.originalPrice && product.originalPrice > product.price)} isNew={isNew} />;
                   })}
+                </div>
+              )}
+
+              {/* Pagination UI */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-8 gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                    Previous
+                  </Button>
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <Button
+                      key={idx + 1}
+                      variant={currentPage === idx + 1 ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </Button>
+                  ))}
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                    Next
+                  </Button>
                 </div>
               )}
 
