@@ -88,18 +88,42 @@ const Shop = () => {
   // Effects for data fetching
   useEffect(() => {
     const fetchCategories = async () => {
+      setIsLoading(true);
       try {
-        const response = await Axios.get(SummaryApi.getAllCategories.url);
-        if (response.data.success) {
-          const allProductsCategory = { _id: 'all', name: 'All Products', productsCount: totalProducts };
-          setCategories([allProductsCategory, ...response.data.data]);
+        const response = await Axios.get(`${SummaryApi.getAllCategories.url}?parent=main`);
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const dynamicCategories = response.data.data.map((cat) => ({
+            name: cat.name,
+            href: `/category/${cat.slug}`,
+          }));
+
+          setNavItems([
+            { name: "Home", href: "/" },
+            { name: "Shop", href: "/shop" },
+            ...dynamicCategories,
+            { name: "About Us", href: "/about" },
+          ]);
+        } else {
+          setNavItems([
+            { name: "Home", href: "/" },
+            { name: "Shop", href: "/shop" },
+            { name: "About Us", href: "/about" },
+          ]);
         }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        setNavItems([
+          { name: "Home", href: "/" },
+          { name: "Shop", href: "/shop" },
+          { name: "About Us", href: "/about" },
+        ]);
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchCategories();
-  }, [totalProducts]);
+  }, []);
 
   useEffect(() => {
     fetchProducts(1, true);
