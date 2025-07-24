@@ -114,7 +114,8 @@ const Shop = () => {
 
   const handleLoadMore = () => {
     if (hasMore && !loadingMore) {
-      fetchProducts(currentPage + 1);
+      // This function is no longer needed as pagination is removed
+      // The filtering and sorting logic handles the initial load and subsequent updates
     }
   };
 
