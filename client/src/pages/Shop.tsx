@@ -61,6 +61,7 @@ const Shop = () => {
         sortOrder: sortOrder || 'desc',
         minPrice: debouncedPriceRange[0].toString(),
         maxPrice: debouncedPriceRange[1].toString(),
+        isActive: 'true', // Always fetch only active products
       });
       if (activeCategory !== 'all') params.append('category', activeCategory);
       if (rating > 0) params.append('minRating', rating.toString());
