@@ -38,7 +38,7 @@ const Shop = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [rating, setRating] = useState(0);
-  const [sortBy, setSortBy] = useState('featured-desc');
+  const [sortBy, setSortBy] = useState('createdAt-desc');
 
   const debouncedPriceRange = useDebounce(priceRange, 500);
   
