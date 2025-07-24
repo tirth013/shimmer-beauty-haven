@@ -48,86 +48,38 @@ const Shop = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Fetching Logic
-  const fetchProducts = useCallback(async (page: number, newFilters = false) => {
-    if (page === 1) setLoading(true); else setLoadingMore(true);
+  const fetchAllCategoryProducts = useCallback(async () => {
+    setLoading(true);
     setError(null);
-
     try {
-      const [sortField, sortOrder] = sortBy.split('-');
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12',
-        sortBy: sortField,
-        sortOrder: sortOrder || 'desc',
-        minPrice: debouncedPriceRange[0].toString(),
-        maxPrice: debouncedPriceRange[1].toString(),
-        isActive: 'true', // Always fetch only active products
-      });
-      if (activeCategory !== 'all') params.append('category', activeCategory);
-      if (rating > 0) params.append('minRating', rating.toString());
-
-      const response = await Axios.get(`${SummaryApi.getAllProducts.url}?${params.toString()}`);
-
-      if (response.data.success) {
-        const { products: newProducts, pagination } = response.data.data;
-        setProducts(prev => newFilters ? newProducts : [...prev, ...newProducts]);
-        setTotalProducts(pagination.totalProducts);
-        setHasMore(pagination.hasNext);
-        setCurrentPage(page);
-      } else {
-        throw new Error("Failed to fetch products");
+      // Fetch all categories first
+      const categoriesRes = await Axios.get(`${SummaryApi.getAllCategories.url}?parent=main`);
+      if (!categoriesRes.data.success || !Array.isArray(categoriesRes.data.data)) {
+        throw new Error('Failed to fetch categories');
       }
+      const categories = categoriesRes.data.data;
+      setCategories(categories);
+      // Fetch products for each category
+      const allProducts: Product[] = [];
+      for (const cat of categories) {
+        const productsRes = await Axios.get(`${SummaryApi.getProductsByCategory.url}/${cat.slug}`);
+        if (productsRes.data.success && productsRes.data.data && Array.isArray(productsRes.data.data.products)) {
+          allProducts.push(...productsRes.data.data.products);
+        }
+      }
+      setProducts(allProducts);
+      setTotalProducts(allProducts.length);
+      setHasMore(false); // No pagination for now
     } catch (err) {
-      setError("Could not load products. Please try again later.");
+      setError('Could not load products. Please try again later.');
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
-  }, [activeCategory, debouncedPriceRange, rating, sortBy]);
-
-  // Effects for data fetching
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoading(true);
-      try {
-        const response = await Axios.get(`${SummaryApi.getAllCategories.url}?parent=main`);
-        if (response.data.success && Array.isArray(response.data.data)) {
-          const dynamicCategories = response.data.data.map((cat) => ({
-            name: cat.name,
-            href: `/category/${cat.slug}`,
-          }));
-
-          setNavItems([
-            { name: "Home", href: "/" },
-            { name: "Shop", href: "/shop" },
-            ...dynamicCategories,
-            { name: "About Us", href: "/about" },
-          ]);
-        } else {
-          setNavItems([
-            { name: "Home", href: "/" },
-            { name: "Shop", href: "/shop" },
-            { name: "About Us", href: "/about" },
-          ]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        setNavItems([
-          { name: "Home", href: "/" },
-          { name: "Shop", href: "/shop" },
-          { name: "About Us", href: "/about" },
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategories();
   }, []);
 
   useEffect(() => {
-    fetchProducts(1, true);
-  }, [fetchProducts]);
+    fetchAllCategoryProducts();
+  }, [fetchAllCategoryProducts]);
 
   const handleLoadMore = () => {
     if (hasMore && !loadingMore) {
